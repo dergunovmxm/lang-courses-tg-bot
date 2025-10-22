@@ -6,7 +6,9 @@ from .time_utils import get_current_time, get_bot_uptime
 logger = logging.getLogger(__name__)
 
 async def show_startup_message(bot: Bot):
-    """Показывает сообщение о запуске бота в консоли"""
+
+    #Показывает сообщение о запуске бота в консоли
+
     try:
         me = await bot.get_me()
         print("\n" + "="*60)
@@ -33,7 +35,9 @@ async def show_startup_message(bot: Bot):
         print("❌ Ошибка при запуске бота")
 
 async def show_shutdown_message():
-    """Показывает сообщение об остановке бота"""
+
+    #Показывает сообщение об остановке бота
+    
     print("\n" + "="*60)
     print("🛑 БОТ ОСТАНАВЛИВАЕТСЯ...")
     print("="*60)

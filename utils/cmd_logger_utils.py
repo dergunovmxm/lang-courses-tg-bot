@@ -13,28 +13,32 @@ logger = logging.getLogger(__name__)
 active_timers = {}
 
 async def cmd_status(message: Message):
-    """Показывает статус бота"""
+
+    #Показывает статус бота
+
     status_info = f"""
-🤖 *Статус бота:*
+    🤖 *Статус бота:*
 
-✅ *Активен и готов к работе!*
-🕐 *Запущен:* {get_current_time()}
-⏱️ *В работе:* {get_bot_uptime()}
-👥 *Активных таймеров:* {len(active_timers)}
+    ✅ *Активен и готов к работе!*
+    🕐 *Запущен:* {get_current_time()}
+    ⏱️ *В работе:* {get_bot_uptime()}
+    👥 *Активных таймеров:* {len(active_timers)}
 
-*Доступные команды:*
-/start - Запустить бота
-/info - Информация о пользователе  
-/timer - Запустить таймер
-/status - Статус бота
+    *Доступные команды:*
+    /start - Запустить бота
+    /info - Информация о пользователе  
+    /timer - Запустить таймер
+    /status - Статус бота
 
-🚀 *Бот работает стабильно!*
-"""
+    🚀 *Бот работает стабильно!*
+    """
     await message.answer(status_info, parse_mode="Markdown")
     logger.info(f"Пользователь {message.from_user.id} запросил статус бота")
 
 async def set_bot_commands(bot: Bot):
-    """Устанавливает команды бота"""
+
+    #Устанавливает команды бота
+
     commands = [
         BotCommand(command="/start", description="Запустить бота"),
         BotCommand(command="/info", description="Информация о тебе"),
@@ -45,13 +49,17 @@ async def set_bot_commands(bot: Bot):
     logger.info("Команды бота установлены")
 
 async def on_startup(bot: Bot):
-    """Действия при запуске бота"""
+
+    #Действия при запуске бота
+
     logger.info("Запуск бота...")
     await set_bot_commands(bot)
     await show_startup_message(bot)
 
 async def on_shutdown(bot: Bot):
-    """Действия при остановке бота"""
+
+    #Действия при остановке бота
+
     await show_shutdown_message()
     
     # Останавливаем все активные таймеры
@@ -63,6 +71,8 @@ async def on_shutdown(bot: Bot):
     await bot.session.close()
 
 def register_handlers(dp: Dispatcher):
-    """Регистрирует обработчики команд в диспетчере"""
+
+    #Регистрирует обработчики команд в диспетчере
+
     dp.message.register(cmd_status, Command("status"))
     logger.info("Команда /status зарегистрирована")

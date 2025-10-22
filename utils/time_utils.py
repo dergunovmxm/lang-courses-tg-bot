@@ -3,16 +3,22 @@ from datetime import datetime
 bot_start_time = None
 
 def set_bot_start_time():
-    """Устанавливает время старта бота"""
+
+    #Устанавливает время старта бота
+
     global bot_start_time
     bot_start_time = datetime.now()
 
 def get_current_time():
-    """Возвращает текущее время в читаемом формате"""
+
+    #Возвращает текущее время в читаемом формате
+
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 def get_bot_uptime():
-    """Возвращает время работы бота"""
+    
+    #Возвращает время работы бота
+
     if bot_start_time is None:
         return "00:00:00"
     

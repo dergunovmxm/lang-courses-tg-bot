@@ -1,0 +1,145 @@
+2025-10-22 10:18:39,439 - INFO - __main__ - Запуск бота...
+2025-10-22 10:18:39,706 - INFO - __main__ - Команды бота установлены
+2025-10-22 10:18:39,771 - INFO - __main__ - Бот @NcwececBot успешно запущен и готов к работе
+2025-10-22 10:18:39,771 - INFO - aiogram.dispatcher - Start polling
+2025-10-22 10:18:39,839 - INFO - aiogram.dispatcher - Run polling for bot @NcwececBot id=7420856080 - 'Test bot'
+2025-10-22 10:20:42,566 - INFO - aiogram.event - Update id=554172483 is handled. Duration 246 ms by bot id=7420856080
+2025-10-22 10:20:46,933 - INFO - aiogram.event - Update id=554172484 is handled. Duration 108 ms by bot id=7420856080
+2025-10-22 10:22:25,107 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 10:22:25,108 - INFO - aiogram.dispatcher - Polling stopped for bot @NcwececBot id=7420856080 - 'Test bot'
+2025-10-22 10:22:25,108 - INFO - aiogram.dispatcher - Polling stopped
+2025-10-22 10:22:25,303 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 10:22:25,360 - INFO - __main__ - Бот остановлен
+2025-10-22 10:22:25,585 - INFO - aiogram.event - Update id=554172485 is not handled. Duration 91951 ms by bot id=7420856080
+2025-10-22 10:22:25,716 - ERROR - asyncio - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x107259e50>
+2025-10-22 10:22:25,716 - ERROR - asyncio - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x10721f350>, 41512.710270382)])']
+connector: <aiohttp.connector.TCPConnector object at 0x107259a90>
+2025-10-22 10:22:31,126 - INFO - __main__ - Запуск бота...
+2025-10-22 10:22:31,392 - INFO - __main__ - Команды бота установлены
+2025-10-22 10:22:31,466 - INFO - __main__ - Бот @NcwececBot успешно запущен и готов к работе
+2025-10-22 10:22:31,466 - INFO - aiogram.dispatcher - Start polling
+2025-10-22 10:22:31,546 - INFO - aiogram.dispatcher - Run polling for bot @NcwececBot id=7420856080 - 'Test bot'
+2025-10-22 10:22:49,575 - INFO - aiogram.event - Update id=554172486 is not handled. Duration 0 ms by bot id=7420856080
+2025-10-22 10:23:00,213 - INFO - aiogram.event - Update id=554172487 is handled. Duration 270 ms by bot id=7420856080
+2025-10-22 10:23:30,285 - INFO - aiogram.event - Update id=554172488 is handled. Duration 212 ms by bot id=7420856080
+2025-10-22 11:01:32,613 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:01:32,614 - INFO - aiogram.dispatcher - Polling stopped for bot @NcwececBot id=7420856080 - 'Test bot'
+2025-10-22 11:01:32,614 - INFO - aiogram.dispatcher - Polling stopped
+2025-10-22 11:01:32,805 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:01:32,866 - INFO - __main__ - Бот остановлен
+2025-10-22 11:01:46,022 - INFO - __main__ - Запуск бота...
+2025-10-22 11:01:46,371 - INFO - __main__ - Команды бота установлены
+2025-10-22 11:01:46,371 - ERROR - __main__ - Критическая ошибка: show_startup_message() missing 1 required positional argument: 'bot'
+2025-10-22 11:01:46,371 - INFO - utils.startup_utils - Бот остановлен
+2025-10-22 11:03:05,685 - INFO - __main__ - Запуск бота...
+2025-10-22 11:03:05,953 - INFO - __main__ - Команды бота установлены
+2025-10-22 11:03:06,022 - INFO - utils.startup_utils - Бот @NcwececBot успешно запущен и готов к работе
+2025-10-22 11:03:06,023 - INFO - aiogram.dispatcher - Start polling
+2025-10-22 11:03:06,088 - INFO - aiogram.dispatcher - Run polling for bot @NcwececBot id=7420856080 - 'Test bot'
+2025-10-22 11:03:46,558 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:03:46,559 - INFO - aiogram.dispatcher - Polling stopped for bot @NcwececBot id=7420856080 - 'Test bot'
+2025-10-22 11:03:46,559 - INFO - aiogram.dispatcher - Polling stopped
+2025-10-22 11:03:46,811 - INFO - utils.startup_utils - Бот остановлен
+2025-10-22 11:03:56,409 - INFO - __main__ - Запуск бота...
+2025-10-22 11:03:59,823 - INFO - __main__ - Команды бота установлены
+2025-10-22 11:03:59,889 - INFO - utils.startup_utils - Бот @Grade_upBot успешно запущен и готов к работе
+2025-10-22 11:03:59,889 - INFO - aiogram.dispatcher - Start polling
+2025-10-22 11:03:59,951 - INFO - aiogram.dispatcher - Run polling for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:04:05,726 - INFO - aiogram.event - Update id=507557155 is handled. Duration 267 ms by bot id=8395084740
+2025-10-22 11:04:09,648 - INFO - aiogram.event - Update id=507557156 is handled. Duration 97 ms by bot id=8395084740
+2025-10-22 11:04:28,002 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:04:28,002 - INFO - aiogram.dispatcher - Polling stopped for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:04:28,003 - INFO - aiogram.dispatcher - Polling stopped
+2025-10-22 11:04:28,255 - INFO - utils.startup_utils - Бот остановлен
+2025-10-22 11:04:28,543 - INFO - aiogram.event - Update id=507557157 is not handled. Duration 15839 ms by bot id=8395084740
+2025-10-22 11:04:28,672 - ERROR - asyncio - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x109099e50>
+2025-10-22 11:04:28,672 - ERROR - asyncio - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x10905af30>, 44035.610862357)])']
+connector: <aiohttp.connector.TCPConnector object at 0x109099a90>
+2025-10-22 11:04:32,348 - INFO - __main__ - Запуск бота...
+2025-10-22 11:04:32,676 - INFO - __main__ - Команды бота установлены
+2025-10-22 11:04:32,749 - INFO - utils.startup_utils - Бот @Grade_upBot успешно запущен и готов к работе
+2025-10-22 11:04:32,749 - INFO - aiogram.dispatcher - Start polling
+2025-10-22 11:04:32,819 - INFO - aiogram.dispatcher - Run polling for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:04:38,471 - INFO - aiogram.event - Update id=507557158 is handled. Duration 305 ms by bot id=8395084740
+2025-10-22 11:12:39,144 - INFO - aiogram.event - Update id=507557161 is handled. Duration 123 ms by bot id=8395084740
+2025-10-22 11:12:41,369 - INFO - aiogram.event - Update id=507557162 is handled. Duration 165 ms by bot id=8395084740
+2025-10-22 11:12:45,158 - INFO - aiogram.event - Update id=507557163 is handled. Duration 125 ms by bot id=8395084740
+2025-10-22 11:13:30,647 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:13:30,648 - INFO - aiogram.dispatcher - Polling stopped for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:13:30,648 - INFO - aiogram.dispatcher - Polling stopped
+2025-10-22 11:13:30,822 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:13:30,900 - INFO - utils.startup_utils - Бот остановлен
+2025-10-22 11:13:31,128 - INFO - aiogram.event - Update id=507557159 is not handled. Duration 529274 ms by bot id=8395084740
+2025-10-22 11:13:31,156 - INFO - aiogram.event - Update id=507557160 is not handled. Duration 55297 ms by bot id=8395084740
+2025-10-22 11:13:31,287 - ERROR - asyncio - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x10e321e50>
+2025-10-22 11:13:31,287 - ERROR - asyncio - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x10e2df350>, 44578.179127237), (<aiohttp.client_proto.ResponseHandler object at 0x10e2df950>, 44578.207368404)])']
+connector: <aiohttp.connector.TCPConnector object at 0x10e321a90>
+2025-10-22 11:13:35,361 - INFO - __main__ - Запуск бота...
+2025-10-22 11:13:35,946 - INFO - __main__ - Команды бота установлены
+2025-10-22 11:13:36,124 - INFO - utils.startup_utils - Бот @Grade_upBot успешно запущен и готов к работе
+2025-10-22 11:13:36,124 - INFO - aiogram.dispatcher - Start polling
+2025-10-22 11:13:36,194 - INFO - aiogram.dispatcher - Run polling for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:14:04,154 - INFO - aiogram.event - Update id=507557164 is handled. Duration 253 ms by bot id=8395084740
+2025-10-22 11:14:06,727 - INFO - aiogram.event - Update id=507557165 is handled. Duration 106 ms by bot id=8395084740
+2025-10-22 11:14:14,942 - INFO - aiogram.event - Update id=507557166 is handled. Duration 100 ms by bot id=8395084740
+2025-10-22 11:14:19,250 - INFO - aiogram.event - Update id=507557168 is handled. Duration 125 ms by bot id=8395084740
+2025-10-22 11:17:30,998 - INFO - aiogram.event - Update id=507557169 is handled. Duration 112 ms by bot id=8395084740
+2025-10-22 11:17:34,970 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:17:34,971 - INFO - aiogram.dispatcher - Polling stopped for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:17:34,971 - INFO - aiogram.dispatcher - Polling stopped
+2025-10-22 11:17:35,153 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:17:35,222 - INFO - utils.startup_utils - Бот остановлен
+2025-10-22 11:17:35,450 - INFO - aiogram.event - Update id=507557167 is not handled. Duration 198019 ms by bot id=8395084740
+2025-10-22 11:17:35,579 - ERROR - asyncio - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x111309950>
+2025-10-22 11:17:35,580 - ERROR - asyncio - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x1112c72f0>, 44822.494535566)])']
+connector: <aiohttp.connector.TCPConnector object at 0x111309310>
+2025-10-22 11:17:42,894 - ERROR - __main__ - Критическая ошибка: on_startup() missing 2 required positional arguments: 'bot' and 'startup_utils'
+2025-10-22 11:17:42,895 - ERROR - __main__ - Неожиданная ошибка: on_shutdown() missing 3 required positional arguments: 'bot', 'shutdown_utils', and 'active_timers_dict'
+2025-10-22 11:20:11,571 - ERROR - __main__ - Критическая ошибка: on_startup() missing 1 required positional argument: 'startup_utils'
+2025-10-22 11:20:11,572 - ERROR - __main__ - Неожиданная ошибка: on_shutdown() missing 2 required positional arguments: 'shutdown_utils' and 'active_timers_dict'
+2025-10-22 11:20:39,712 - INFO - utils.cmd_logger_utils - Запуск бота...
+2025-10-22 11:20:40,011 - INFO - utils.cmd_logger_utils - Команды бота установлены
+2025-10-22 11:20:40,079 - INFO - utils.startup_utils - Бот @Grade_upBot успешно запущен и готов к работе
+2025-10-22 11:20:40,079 - INFO - aiogram.dispatcher - Start polling
+2025-10-22 11:20:40,143 - INFO - aiogram.dispatcher - Run polling for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:20:59,182 - INFO - aiogram.event - Update id=507557170 is handled. Duration 274 ms by bot id=8395084740
+2025-10-22 11:21:01,665 - INFO - aiogram.event - Update id=507557171 is not handled. Duration 0 ms by bot id=8395084740
+2025-10-22 11:21:09,300 - INFO - aiogram.event - Update id=507557172 is handled. Duration 99 ms by bot id=8395084740
+2025-10-22 11:21:13,961 - INFO - aiogram.event - Update id=507557174 is not handled. Duration 0 ms by bot id=8395084740
+2025-10-22 11:21:40,694 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:21:40,694 - INFO - aiogram.dispatcher - Polling stopped for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:21:40,695 - INFO - aiogram.dispatcher - Polling stopped
+2025-10-22 11:21:40,890 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:21:40,947 - INFO - utils.startup_utils - Бот остановлен
+2025-10-22 11:21:41,315 - INFO - aiogram.event - Update id=507557173 is not handled. Duration 30149 ms by bot id=8395084740
+2025-10-22 11:21:41,443 - ERROR - asyncio - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x10c5c5a90>
+2025-10-22 11:21:41,443 - ERROR - asyncio - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x10c583a70>, 45068.425417719)])']
+connector: <aiohttp.connector.TCPConnector object at 0x10c5c5450>
+2025-10-22 11:21:45,682 - INFO - utils.cmd_logger_utils - Команда /status зарегистрирована
+2025-10-22 11:21:45,682 - INFO - utils.cmd_logger_utils - Запуск бота...
+2025-10-22 11:21:45,944 - INFO - utils.cmd_logger_utils - Команды бота установлены
+2025-10-22 11:21:46,010 - INFO - utils.startup_utils - Бот @Grade_upBot успешно запущен и готов к работе
+2025-10-22 11:21:46,010 - INFO - aiogram.dispatcher - Start polling
+2025-10-22 11:21:46,074 - INFO - aiogram.dispatcher - Run polling for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:21:54,085 - INFO - utils.cmd_logger_utils - Пользователь 659718156 запросил статус бота
+2025-10-22 11:21:54,085 - INFO - aiogram.event - Update id=507557175 is handled. Duration 271 ms by bot id=8395084740
+2025-10-22 11:23:36,003 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2025-10-22 11:23:36,003 - INFO - aiogram.dispatcher - Polling stopped for bot @Grade_upBot id=8395084740 - 'GradeUp'
+2025-10-22 11:23:36,004 - INFO - aiogram.dispatcher - Polling stopped
+2025-10-22 11:23:36,255 - INFO - utils.startup_utils - Бот остановлен
+2025-10-22 11:23:43,741 - INFO - utils.cmd_logger_utils - Команда /status зарегистрирована
+2025-10-22 11:23:43,742 - INFO - utils.cmd_logger_utils - Запуск бота...
+2025-10-22 11:23:44,087 - INFO - utils.cmd_logger_utils - Команды бота установлены
+2025-10-22 11:23:44,151 - INFO - utils.startup_utils - Бот @Grade_upBot успешно запущен и готов к работе
+2025-10-22 11:23:44,152 - INFO - aiogram.dispatcher - Start polling
+2025-10-22 11:23:44,229 - INFO - aiogram.dispatcher - Run polling for bot @Grade_upBot id=8395084740 - 'GradeUp'

@@ -20,18 +20,22 @@ async def handle_start(message: Message):
             user.username or "", 
             user.first_name, 
             user.last_name, 
-            user.language_code or 'ru'
+            user.language_code or 'ru',
+            message.chat.id,
         )
         
         if db_user:
             welcome_text = (
-                f"Привет, {user.first_name}! 👋\n\n"
-                "Я бот для отслеживания твоих занятий по изучению языков.\n\n"
-                "Доступные команды:\n"
+                f"Привет, {user.first_name}! 👋\n"
+                'Добро пожаловать в GradeUp🎓\n\n'
+                'Мы готовы помочь тебе в освоении иностранных языков!\n'
+                "Начни прямо сейчас - приступай с заданиям и набирай очки💪\n\n"
+                "📌Основные команды:\n"
                 "/start - начать работу\n"
                 "/profile - мой профиль\n" 
                 "/timer - запустить таймер занятия\n"
                 "/info - информация о боте\n\n"
+                'Учись регулярно — и результат не заставит себя ждать!'
             )
         else:
             welcome_text = (

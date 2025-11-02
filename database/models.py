@@ -10,7 +10,8 @@ class User:
                  language_code: str = 'ru',
                  created_at: Optional[str] = None,
                  updated_at: Optional[str] = None,
-                 is_active: bool = True):
+                 is_active: bool = True,
+                 chat_id: Optional[int] = None):
         self.telegram_id = telegram_id
         self.username = username
         self.first_name = first_name
@@ -19,7 +20,7 @@ class User:
         self.created_at = created_at or datetime.now().isoformat()
         self.updated_at = updated_at or datetime.now().isoformat()
         self.is_active = is_active
-    
+        self.chat_id = chat_id
     def to_dict(self) -> Dict[str, Any]:
         
         #Конвертация в словарь для Supabase
@@ -32,7 +33,8 @@ class User:
             'language_code': self.language_code,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
-            'is_active': self.is_active
+            'is_active': self.is_active,
+            'chat_id': self.chat_id
         }
     
     @classmethod
@@ -48,7 +50,8 @@ class User:
             language_code=data.get('language_code', 'ru'),
             created_at=data.get('created_at'),
             updated_at=data.get('updated_at'),
-            is_active=data.get('is_active', True)
+            is_active=data.get('is_active', True),
+            chat_id=data.get('chat_id'),
         )
 
 class UserSettings:

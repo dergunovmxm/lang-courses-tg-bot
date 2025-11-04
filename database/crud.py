@@ -1,25 +1,26 @@
 from .supabase_client import supabase_client
-from .models import User, UserSettings
-from typing import Optional
-import logging
+from typing import Optional, Dict, Any
 from datetime import datetime
+import logging
 
 logger = logging.getLogger(__name__)
 
 class UserCRUD:
-    def get_user_by_telegram_id(self, telegram_id: int) -> Optional[User]:
+    def get_user_by_telegram_id(self, telegram_id: int) -> Optional[Dict[str, Any]]:
         try:
-            result = supabase_client.select('users', {'telegram_id': telegram_id})  # только 2 позиции
-            if result and len(result) > 0:
-                return User.from_dict(result[0])
+            result = supabase_client.select('users', limit=1)
+            for user in result:
+                if user.get("telegram_id") == telegram_id:
+                    return user
             return None
         except Exception as e:
             logger.error(f"Ошибка получения пользователя {telegram_id}: {e}")
             return None
 
-    def create_user(self, telegram_id: int, username: str, first_name: str, last_name: str = None, language_code: str = 'ru', chat_id: Optional[int] = None) -> Optional[User]:
+    def create_user(self, telegram_id: int, username: str, first_name: str,
+                    last_name: str = None, language_code: str = 'ru', chat_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
         try:
-            data = {
+            user_data = {
                 'telegram_id': telegram_id,
                 'username': username,
                 'first_name': first_name,
@@ -30,17 +31,19 @@ class UserCRUD:
                 'updated_at': datetime.utcnow().isoformat(),
                 'is_active': True
             }
-            result = supabase_client.insert('users', data)
+            result = supabase_client.insert('users', user_data)
             if result:
-                return User.from_dict(result)
+                logger.info(f"Создан новый пользователь {telegram_id}")
+                return result
             return None
         except Exception as e:
             logger.error(f"Ошибка создания пользователя {telegram_id}: {e}")
             return None
 
-    def update_user(self, telegram_id: int, username: str, first_name: str, last_name: str = None, language_code: str = 'ru', chat_id: Optional[int] = None) -> Optional[User]:
+    def update_user(self, telegram_id: int, username: str, first_name: str,
+                    last_name: str = None, language_code: str = 'ru', chat_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
         try:
-            data = {
+            update_data = {
                 'username': username,
                 'first_name': first_name,
                 'last_name': last_name,
@@ -48,36 +51,38 @@ class UserCRUD:
                 'chat_id': chat_id,
                 'updated_at': datetime.utcnow().isoformat()
             }
-            result = supabase_client.update('users', {'telegram_id': telegram_id}, data)
+            result = supabase_client.update('users', {'telegram_id': telegram_id}, update_data)
             if result:
-                return User.from_dict(result)
+                return result
             return None
         except Exception as e:
             logger.error(f"Ошибка обновления пользователя {telegram_id}: {e}")
             return None
 
-    def get_or_create_user(self, telegram_id: int, username: str, first_name: str, last_name: str = None, language_code: str = 'ru', chat_id: Optional[int] = None) -> Optional[User]:
+    def get_or_create_user(self, telegram_id: int, username: str, first_name: str,
+                           last_name: str = None, language_code: str = 'ru', chat_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
         user = self.get_user_by_telegram_id(telegram_id)
         if user:
-            return self.update_user(telegram_id, username, first_name, last_name, language_code, chat_id)
+            updated = self.update_user(telegram_id, username, first_name, last_name, language_code, chat_id)
+            return updated or user
         else:
             return self.create_user(telegram_id, username, first_name, last_name, language_code, chat_id)
 
-
 class UserSettingsCRUD:
-    def get_settings(self, telegram_id: int) -> Optional[UserSettings]:
+    def get_settings(self, telegram_id: int) -> Optional[Dict[str, Any]]:
         try:
-            result = supabase_client.select('user_settings', {'telegram_id': telegram_id})  # только 2 позиции
-            if result and len(result) > 0:
-                return UserSettings.from_dict(result[0])
+            result = supabase_client.select('user_settings', limit=1)
+            for s in result:
+                if s.get("telegram_id") == telegram_id:
+                    return s
             return None
         except Exception as e:
             logger.error(f"Ошибка получения настроек пользователя {telegram_id}: {e}")
             return None
 
-    def create_default_settings(self, telegram_id: int) -> Optional[UserSettings]:
+    def create_default_settings(self, telegram_id: int) -> Optional[Dict[str, Any]]:
         try:
-            data = {
+            settings_data = {
                 'telegram_id': telegram_id,
                 'notification_enabled': True,
                 'daily_reminder_time': "09:00",
@@ -86,33 +91,29 @@ class UserSettingsCRUD:
                 'created_at': datetime.utcnow().isoformat(),
                 'updated_at': datetime.utcnow().isoformat()
             }
-            result = supabase_client.insert('user_settings', data)
-            if result:
-                return UserSettings.from_dict(result)
-            return None
+            result = supabase_client.insert('user_settings', settings_data)
+            return result
         except Exception as e:
             logger.error(f"Ошибка создания настроек пользователя {telegram_id}: {e}")
             return None
 
-    def update_notification(self, telegram_id: int, enabled: bool) -> Optional[UserSettings]:
-        settings = self.get_settings(telegram_id)
-        if not settings:
-            settings = self.create_default_settings(telegram_id)
-            if not settings:
-                return None
+    def update_notification_settings(self, telegram_id: int, enabled: bool) -> Optional[Dict[str, Any]]:
         try:
-            data = {
+            settings = self.get_settings(telegram_id)
+            if not settings:
+                settings = self.create_default_settings(telegram_id)
+                if not settings:
+                    return None
+
+            update_data = {
                 'notification_enabled': enabled,
                 'updated_at': datetime.utcnow().isoformat()
             }
-            result = supabase_client.update('user_settings', {'telegram_id': telegram_id}, data)
-            if result:
-                return UserSettings.from_dict(result)
-            return None
+            result = supabase_client.update('user_settings', {'telegram_id': telegram_id}, update_data)
+            return result
         except Exception as e:
-            logger.error(f"Ошибка обновления уведомлений {telegram_id}: {e}")
+            logger.error(f"Ошибка обновления настроек уведомлений {telegram_id}: {e}")
             return None
-
 
 user_crud = UserCRUD()
 settings_crud = UserSettingsCRUD()

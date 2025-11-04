@@ -19,19 +19,17 @@ class SupabaseClient:
         self._test_connection()
     
     def _test_connection(self):
-
-        #Тестирование подключения к Supabase
-
+        """Тестирование подключения к Supabase"""
         try:
-            response = requests.get(
-                f"{self.base_url}/rest/v1/",
-                headers={'apikey': self.api_key}
-            )
-            if response.status_code == 200:
+           
+            url = f"{self.base_url}/rest/v1/tasks"
+            response = requests.get(url, headers={'apikey': self.api_key})
+            
+            if response.status_code in (200, 404): 
                 self.is_connected = True
                 logger.info("✅ Успешное подключение к Supabase")
             else:
-                logger.error(f"❌ Ошибка подключения: {response.status_code}")
+                logger.error(f"❌ Ошибка подключения: {response.status_code} - {response.text}")
         except Exception as e:
             logger.error(f"❌ Ошибка подключения к Supabase: {e}")
 
@@ -40,7 +38,7 @@ class SupabaseClient:
     
     def insert(self, table: str, data: dict) -> Optional[Dict]:
 
-        #Вставка данных в таблицу
+      
 
         if not self.is_connected:
             return None
@@ -51,8 +49,9 @@ class SupabaseClient:
                 headers=self.headers,
                 json=data
             )
-            if response.status_code == 201:
+            if response.status_code in (200, 201):
                 result = response.json()
+                logger.info(f'✅ Вставка в {table} прошла успешно: {result}')
                 return result[0] if isinstance(result, list) and result else result
             else:
                 logger.error(f"❌ Ошибка вставки в {table}: {response.status_code} - {response.text}")
@@ -61,44 +60,29 @@ class SupabaseClient:
             logger.error(f"❌ Ошибка вставки в {table}: {e}")
             return None
     
-    def select(self, table: str, filters: Dict[str, Any] = None, limit: int = None, order: str = None) -> List[Dict]:
-
-        #Выборка данных из таблицы
-        
-        if not self.is_connected:
-            return []
-        
+    def select(self, table, limit=10):
+        """
+        Получить данные из таблицы Supabase.
+        """
         try:
-            url = f"{self.base_url}/rest/v1/{table}"
-            params = {}
+            url = f"{self.base_url}/rest/v1/{table}?select=*&limit={limit}"
+            print(f"🔍 Запрос к Supabase: {url}")
+            print(f"🔑 Заголовки: {self.headers}")
             
-            # Добавляем фильтры
-            if filters:
-                for key, value in filters.items():
-                    params[key] = f"eq.{value}"
-            
-            # Добавляем лимит
-            if limit:
-                params['limit'] = str(limit)
-            
-            # Добавляем сортировку
-            if order:
-                params['order'] = order
-            
-            response = requests.get(url, headers=self.headers, params=params)
-            
-            if response.status_code == 200:
-                return response.json()
-            else:
-                logger.error(f"❌ Ошибка выборки из {table}: {response.status_code} - {response.text}")
-                return []
+            response = requests.get(url, headers=self.headers)
+            print(f"📡 Статус ответа: {response.status_code}")
+            print(f"📦 Тело ответа: {response.text[:500]}")  # первые 500 символов
+
+            response.raise_for_status()
+            data = response.json()
+            print(f"✅ Получено {len(data)} записей")
+            return data
         except Exception as e:
-            logger.error(f"❌ Ошибка выборки из {table}: {e}")
+            print(f"💥 Ошибка при получении данных из {table}: {e}")
             return []
     
     def update(self, table: str, filters: Dict[str, Any], data: dict) -> Optional[Dict]:
 
-        #Обновление данных в таблице
 
         if not self.is_connected:
             return None
@@ -107,7 +91,7 @@ class SupabaseClient:
             url = f"{self.base_url}/rest/v1/{table}"
             params = {}
             
-            # Добавляем фильтры
+
             if filters:
                 for key, value in filters.items():
                     params[key] = f"eq.{value}"
@@ -131,7 +115,6 @@ class SupabaseClient:
     
     def delete(self, table: str, filters: Dict[str, Any]) -> bool:
 
-        #Удаление данных из таблицы
         
         if not self.is_connected:
             return False
@@ -140,7 +123,6 @@ class SupabaseClient:
             url = f"{self.base_url}/rest/v1/{table}"
             params = {}
             
-            # Добавляем фильтры
             if filters:
                 for key, value in filters.items():
                     params[key] = f"eq.{value}"
@@ -178,7 +160,7 @@ class SupabaseClient:
             response = requests.get(url, headers=headers, params=params)
             
             if response.status_code == 200:
-                # Supabase возвращает количество в заголовке
+    
                 count_header = response.headers.get('content-range')
                 if count_header and '/' in count_header:
                     return int(count_header.split('/')[-1])
@@ -190,5 +172,5 @@ class SupabaseClient:
             logger.error(f"❌ Ошибка подсчета в {table}: {e}")
             return 0
 
-# Глобальный экземпляр клиента
+
 supabase_client = SupabaseClient()

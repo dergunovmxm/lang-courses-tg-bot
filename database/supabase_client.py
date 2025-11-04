@@ -49,8 +49,9 @@ class SupabaseClient:
                 headers=self.headers,
                 json=data
             )
-            if response.status_code == 201:
+            if response.status_code in (200, 201):
                 result = response.json()
+                logger.info(f'✅ Вставка в {table} прошла успешно: {result}')
                 return result[0] if isinstance(result, list) and result else result
             else:
                 logger.error(f"❌ Ошибка вставки в {table}: {response.status_code} - {response.text}")

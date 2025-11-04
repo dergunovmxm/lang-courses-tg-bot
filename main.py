@@ -8,7 +8,7 @@ from app.handlers.timer import get_timer_handler
 from app.handlers.profile import get_profile_handler
 from utils.startup_utils import show_startup_message
 import logging
-
+from app.handlers.testing import get_test_handler
 logger = logging.getLogger(__name__)
 
 # Создание бота и диспетчера
@@ -37,7 +37,7 @@ async def on_startup(bot: Bot):
         dp.include_router(get_info_handler())
         dp.include_router(get_timer_handler())
         dp.include_router(get_profile_handler())
-        
+        dp.include_router(get_test_handler())
         # Отправка сообщения о запуске (опционально)
         await show_startup_message(bot)
         return True
@@ -81,6 +81,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\n🔸 Бот остановлен по команде пользователя (Ctrl+C)")
+
     except Exception as e:
         logger.error(f"❌ Неожиданная ошибка: {e}")
         print(f"❌ Неожиданная ошибка: {e}")

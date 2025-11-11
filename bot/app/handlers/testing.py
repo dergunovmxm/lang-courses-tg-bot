@@ -10,10 +10,12 @@ import time
 
 logger = logging.getLogger(__name__)
 
+
 tasks = supabase_client.select("tasks")
 logger.info(f"🔍 Загружено {len(tasks) if tasks else 'None'} заданий из Supabase")
 if tasks:
     logger.info(f"Пример первого задания: {tasks[0]}")
+
 
 class TestStates(StatesGroup):
     awaiting_start_confirmation = State()
@@ -21,6 +23,7 @@ class TestStates(StatesGroup):
 
 
 async def send_message_with_min_delay(message: Message, text: str, reply_markup=None, min_delay: float = 1.5):
+    """Отправка сообщения с минимальной задержкой"""
     start_time = time.monotonic()
     await message.answer(text, reply_markup=reply_markup)
     elapsed = time.monotonic() - start_time
@@ -32,8 +35,18 @@ async def send_message_with_min_delay(message: Message, text: str, reply_markup=
 def get_test_handler() -> Router:
     router = Router(name="test_router")
 
+    # Команда /test
     @router.message(F.text == "/test")
     async def start_test_handler(message: Message, state: FSMContext):
+        """Запуск теста"""
+        current_state = await state.get_state()
+
+        # Если пользователь уже проходит тест — завершаем
+        if current_state == TestStates.in_progress.state:
+            await message.answer("⏹ Тестирование завершено досрочно.", reply_markup=ReplyKeyboardRemove())
+            await state.clear()
+            return
+
         kb = ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text="Да"), KeyboardButton(text="Нет")]],
             resize_keyboard=True,
@@ -42,6 +55,7 @@ def get_test_handler() -> Router:
         await send_message_with_min_delay(message, "Готов начать тестирование?", reply_markup=kb)
         await state.set_state(TestStates.awaiting_start_confirmation)
 
+    # Подтверждение начала теста 
     @router.message(TestStates.awaiting_start_confirmation, F.text.in_({"Да", "Нет"}))
     async def handle_confirmation(message: Message, state: FSMContext):
         if message.text == "Нет":
@@ -50,9 +64,8 @@ def get_test_handler() -> Router:
             return
 
         try:
-            tasks = supabase_client.select("tasks")
-            if tasks is None:
-                tasks = []
+            tasks = supabase_client.select("tasks") or []
+            
         except Exception as e:
             logger.error(f"Ошибка при загрузке заданий: {e}")
             await send_message_with_min_delay(message, "❌ Ошибка при загрузке заданий. Попробуйте позже.")
@@ -68,10 +81,12 @@ def get_test_handler() -> Router:
             tasks=tasks,
             current_index=0,
             correct_count=0,
-            total=len(tasks)
+            total=len(tasks),
+            last_message_time=0
         )
         await send_next_task(message, state)
 
+  
     async def send_next_task(message: Message, state: FSMContext):
         data = await state.get_data()
         tasks = data["tasks"]
@@ -82,7 +97,7 @@ def get_test_handler() -> Router:
             total = data["total"]
             await send_message_with_min_delay(
                 message,
-                f"Тест завершён!\nПравильных ответов: {correct} из {total}.",
+                f"✅ Тест завершён!\nПравильных ответов: {correct} из {total}.",
                 reply_markup=ReplyKeyboardRemove()
             )
             await state.clear()
@@ -117,25 +132,69 @@ def get_test_handler() -> Router:
 
         await state.set_state(TestStates.in_progress)
 
+    # Обработка ответов
     @router.message(TestStates.in_progress)
     async def handle_answer(message: Message, state: FSMContext):
         user_answer = message.text.strip()
+
+        # Досрочное завершение теста
+        if user_answer.lower() == "/test":
+            await message.answer("⏹ Тестирование завершено досрочно.", reply_markup=ReplyKeyboardRemove())
+            await state.clear()
+            return
+
         data = await state.get_data()
-        tasks = data["tasks"]
-        index = data["current_index"]
-        task = tasks[index]
+        last_message_time = data.get("last_message_time", 0)
+        now = time.monotonic()
 
-        correct_answer = str(task.get("answer", "")).strip()
-        is_correct = user_answer.lower() == correct_answer.lower()
+        # Защита от слишком быстрой отправки
+        if now - last_message_time < 2:
+            await message.answer("⚠️ Вы печатаете слишком быстро! Подождите немного ⏳")
+            return
 
-        if is_correct:
-            await state.update_data(correct_count=data["correct_count"] + 1)
-            await send_message_with_min_delay(message, "✅ Верно!")
-        else:
-            solution = task.get("solution") or f"Правильный ответ: {correct_answer}"
-            await send_message_with_min_delay(message, f"❌ Неверно.\n{solution}")
+        await state.update_data(last_message_time=now)
 
-        await state.update_data(current_index=index + 1)
-        await send_next_task(message, state)
+        # Отправляем сообщение-заглушку
+        processing_msg = await message.answer("⏳ Ответ принят, проверяю...")
+
+        try:
+            start_check_time = time.monotonic()  # Засекаем время начала проверки
+
+            tasks = data["tasks"]
+            index = data["current_index"]
+            task = tasks[index]
+
+            correct_answer = str(task.get("answer", "")).strip()
+            is_correct = user_answer.lower() == correct_answer.lower()
+
+            end_check_time = time.monotonic()
+            check_duration = end_check_time - start_check_time  # сколько заняла проверка
+
+            # Удаляем "Ответ принят..."
+            await message.bot.delete_message(chat_id=message.chat.id, message_id=processing_msg.message_id)
+
+            # Если проверка была слишком быстрой (< 0.8 сек) — добавим небольшую задержку
+            if check_duration < 0.8:
+                await asyncio.sleep(0.8 - check_duration)
+
+            # Отправляем результат
+            if is_correct:
+                await state.update_data(correct_count=data["correct_count"] + 1)
+                await send_message_with_min_delay(message, "✅ Верно!")
+            else:
+                solution = task.get("solution") or f"Правильный ответ: {correct_answer}"
+                await send_message_with_min_delay(message, f"❌ Неверно.\n{solution}")
+
+            # Следующий вопрос
+            await state.update_data(current_index=index + 1)
+            await send_next_task(message, state)
+
+        except Exception as e:
+            logger.error(f"Ошибка при проверке ответа: {e}")
+            try:
+                await message.bot.delete_message(chat_id=message.chat.id, message_id=processing_msg.message_id)
+            except:
+                pass
+            await message.answer("❌ Ошибка при проверке ответа. Попробуйте снова.")
 
     return router

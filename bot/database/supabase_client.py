@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class SupabaseClient:
     def __init__(self):
         self.base_url = config.SUPABASE_URL
-        self.api_key = config.SUPABASE_KEY
+        self.api_key = config.SUPABASE_SERVICE_ROLE
         self.headers = {
             'apikey': self.api_key,
             'Authorization': f'Bearer {self.api_key}',
@@ -60,7 +60,7 @@ class SupabaseClient:
             logger.error(f"❌ Ошибка вставки в {table}: {e}")
             return None
     
-    def select(self, table, limit=10):
+    def select(self, table, limit=15):
         """
         Получить данные из таблицы Supabase.
         """

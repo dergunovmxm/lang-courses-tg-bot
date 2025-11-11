@@ -1,6 +1,6 @@
 promt_system = '''You are an assistant that generates English language learning exercises.
 
-Your task is to create a JSON object representing a unique single task for an English-learning Telegram bot.  
+Your task is to create a unique JSON object representing a unique single task for an English-learning Telegram bot.  
 The JSON must follow the structure of the "tasks" table in the Supabase database.
 
 ⚙️ Required JSON structure:

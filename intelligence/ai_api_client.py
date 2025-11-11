@@ -4,9 +4,9 @@ import requests
 from promt import promt_system, promt_user
 import json
 project_root = Path(__file__).resolve().parent.parent
-sys.path.append(str(project_root))
-import database.supabase_client 
-from config import config
+sys.path.insert(0, str(project_root))
+import bot.database.supabase_client 
+from bot.config import config
 url = 'https://api.intelligence.io.solutions/api/v1/chat/completions'
 ai_key = config.API_DEEPSEEK
 headers = {
@@ -29,7 +29,7 @@ if response.status_code == 200:
     text = result['choices'][0]['message']['content']
     task = text.split('</think>\n')[1]
     task_data = json.loads(task)
-    database.supabase_client.supabase_client.insert('tasks', task_data)
+    bot.database.supabase_client.supabase_client.insert('tasks', task_data)
     print(task)
 else:
     print(f"Ошибка: {response.status_code}")

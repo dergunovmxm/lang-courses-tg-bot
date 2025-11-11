@@ -2,17 +2,34 @@ from .supabase_client import supabase_client
 from typing import Optional, Dict, Any
 from datetime import datetime
 import logging
-
+import requests
 logger = logging.getLogger(__name__)
 
 class UserCRUD:
     def get_user_by_telegram_id(self, telegram_id: int) -> Optional[Dict[str, Any]]:
+        import requests
         try:
-            result = supabase_client.select('users', limit=1)
-            for user in result:
-                if user.get("telegram_id") == telegram_id:
-                    return user
-            return None
+            url = f"{supabase_client.base_url}/rest/v1/users"
+            params = {
+                "telegram_id": f"eq.{telegram_id}",
+                "select": "*",
+                "limit": 1
+            }
+
+            response = requests.get(url, headers=supabase_client.headers, params=params)
+
+            if response.status_code == 200:
+                data = response.json()
+                if data:
+                    logger.info(f"👤 Пользователь {telegram_id} найден в базе")
+                    return data[0]
+                else:
+                    logger.info(f"👤 Пользователь {telegram_id} не найден в базе")
+                    return None
+            else:
+                logger.error(f"Ошибка получения пользователя {telegram_id}: {response.status_code} - {response.text}")
+                return None
+
         except Exception as e:
             logger.error(f"Ошибка получения пользователя {telegram_id}: {e}")
             return None

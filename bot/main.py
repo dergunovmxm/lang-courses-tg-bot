@@ -1,6 +1,5 @@
 import asyncio
 from aiogram import Bot, Dispatcher
-from config import Config
 from database.supabase_client import supabase_client
 from app.handlers.start import get_start_handler
 from app.handlers.info import get_info_handler
@@ -10,9 +9,9 @@ from utils.startup_utils import show_startup_message
 import logging
 from app.handlers.testing import get_test_handler
 logger = logging.getLogger(__name__)
-
+from config import config
 # Создание бота и диспетчера
-bot = Bot(token=Config.BOT_TOKEN)
+bot = Bot(token=config.BOT_TOKEN)
 dp = Dispatcher()
 
 async def on_startup(bot: Bot):
@@ -21,7 +20,7 @@ async def on_startup(bot: Bot):
 
     try:
         # Валидация конфигурации
-        Config.validate()
+        config.validate()
         
         # Тестирование подключения к Supabase
         if supabase_client.test_connection():

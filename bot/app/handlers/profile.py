@@ -13,7 +13,6 @@ router = Router()
 async def handle_profile(message: Message):
 
     #Обработчик команды /profile - показывает профиль пользователя
-    
     user = message.from_user
     
     try:
@@ -23,7 +22,6 @@ async def handle_profile(message: Message):
             await message.answer("❌ Произошла ошибка при загрузке профиля")
             return
 
-        
         # Получаем настройки
         settings = settings_crud.get_settings(user.id)
         if not settings:

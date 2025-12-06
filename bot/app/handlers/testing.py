@@ -2,20 +2,13 @@ from aiogram import Router, F
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from database.supabase_client import supabase_client
+from database.connection import postgresql_client
 import logging
 import asyncio
 import json
 import time
 
 logger = logging.getLogger(__name__)
-
-
-tasks = supabase_client.select("tasks")
-logger.info(f"🔍 Загружено {len(tasks) if tasks else 'None'} заданий из Supabase")
-if tasks:
-    logger.info(f"Пример первого задания: {tasks[0]}")
-
 
 class TestStates(StatesGroup):
     awaiting_start_confirmation = State()
@@ -35,6 +28,21 @@ async def send_message_with_min_delay(message: Message, text: str, reply_markup=
 def get_test_handler() -> Router:
     router = Router(name="test_router")
 
+    async def load_tasks_from_db():
+        """Загрузка задач из базы данных"""
+        try:
+            tasks = postgresql_client.select("tasks")
+            logger.info(f"🔍 Загружено {len(tasks) if tasks else 0} заданий из PostgreSQL")
+            
+            if tasks:
+                logger.info(f"Пример первого задания: {tasks[0]}")
+            
+            return tasks or []
+            
+        except Exception as e:
+            logger.error(f"Ошибка при загрузке заданий: {e}", exc_info=True)
+            return []
+
     # Команда /test
     @router.message(F.text == "/test")
     async def start_test_handler(message: Message, state: FSMContext):
@@ -46,13 +54,27 @@ def get_test_handler() -> Router:
             await message.answer("⏹ Тестирование завершено досрочно.", reply_markup=ReplyKeyboardRemove())
             await state.clear()
             return
+        
+        try:
+            tasks = await load_tasks_from_db()
+            
+            if not tasks:
+                await send_message_with_min_delay(
+                    message, 
+                    "❌ Нет доступных заданий.",
+                    reply_markup=ReplyKeyboardRemove()
+                )
+                return
+                
+        except Exception as e:
+            logger.error(f"Ошибка при предзагрузке заданий: {e}")
 
         kb = ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text="Да"), KeyboardButton(text="Нет")]],
             resize_keyboard=True,
             one_time_keyboard=True
         )
-        await send_message_with_min_delay(message, "Готов начать тестирование?", reply_markup=kb)
+        await send_message_with_min_delay(message, "Начинаем тестирование?", reply_markup=kb)
         await state.set_state(TestStates.awaiting_start_confirmation)
 
     # Подтверждение начала теста 
@@ -64,26 +86,33 @@ def get_test_handler() -> Router:
             return
 
         try:
-            tasks = supabase_client.select("tasks") or []
+            tasks = await load_tasks_from_db()
+
+            if not tasks:
+                await send_message_with_min_delay(message, "❌ Нет доступных заданий.", reply_markup=ReplyKeyboardRemove())
+                await state.clear()
+                return
             
         except Exception as e:
             logger.error(f"Ошибка при загрузке заданий: {e}")
-            await send_message_with_min_delay(message, "❌ Ошибка при загрузке заданий. Попробуйте позже.")
+            await send_message_with_min_delay(
+                message, 
+                "❌ Ошибка при загрузке заданий",
+                reply_markup=ReplyKeyboardRemove()
+            )
             await state.clear()
             return
-
-        if not tasks:
-            await send_message_with_min_delay(message, "Нет доступных заданий.", reply_markup=ReplyKeyboardRemove())
-            await state.clear()
-            return
-
+        
+         # Сохраняем данные теста
         await state.update_data(
             tasks=tasks,
             current_index=0,
             correct_count=0,
             total=len(tasks),
-            last_message_time=0
+            last_message_time=0,
+            start_time=time.time()  # Запоминаем время начала теста
         )
+        
         await send_next_task(message, state)
 
   
@@ -175,7 +204,7 @@ def get_test_handler() -> Router:
 
             # Если проверка была слишком быстрой (< 0.8 сек) — добавим небольшую задержку
             if check_duration < 0.8:
-                await asyncio.sleep(0.8 - check_duration)
+                await asyncio.sleep(2)
 
             # Отправляем результат
             if is_correct:

@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import Bot, Dispatcher
 from config import Config
-from database.supabase_client import supabase_client
+from database.connection import postgresql_client
 from app.handlers.start import get_start_handler
 from app.handlers.info import get_info_handler
 from app.handlers.timer import get_timer_handler
@@ -18,18 +18,17 @@ dp = Dispatcher()
 async def on_startup(bot: Bot):
 
     #Функция, выполняемая при запуске бота
-
     try:
         # Валидация конфигурации
         Config.validate()
-        
-        # Тестирование подключения к Supabase
-        if supabase_client.test_connection():
-            logger.info("✅ Подключение к Supabase успешно установлено")
-            print("✅ Подключение к Supabase успешно установлено")
+        # Тестирование подключения к PostgreSQL
+        if postgresql_client.test_connection():
+            logger.info("✅ Подключение к PostgreSQL успешно установлено")
+            print("✅ Подключение к PostgreSQL успешно установлено")
+
         else:
-            logger.error("❌ Не удалось подключиться к Supabase")
-            print("❌ Не удалось подключиться к Supabase")
+            logger.error("❌ Не удалось подключиться к PostgreSQL")
+            print("❌ Не удалось подключиться к PostgreSQL")
             return False
         
         # Регистрация роутеров
@@ -47,18 +46,17 @@ async def on_startup(bot: Bot):
         print(f"❌ Ошибка при запуске бота: {e}")
         return False
 
-async def on_shutdown(bot: Bot):
-
+async def on_shutdown():
     #Функция, выполняемая при остановке бота
-
     try:
-        # Закрытие соединений (если нужно)
-        
+        # Закрытие соединения с базой данных
+        if hasattr(postgresql_client, 'close'):
+            postgresql_client.close()
+            logger.info("✅ Соединение с PostgreSQL закрыто")
+            print("✅ Соединение с PostgreSQL закрыто")
         logger.info("🔸 Бот остановлен")
         print("🔸 Бот остановлен")
-        
-        # Отправка сообщения об остановке (опционально)
-        
+
     except Exception as e:
         logger.error(f"❌ Ошибка при остановке бота: {e}")
         print(f"❌ Ошибка при остановке бота: {e}")
@@ -74,7 +72,7 @@ async def main():
         logger.error(f"❌ Критическая ошибка: {e}")
         print(f"❌ Критическая ошибка: {e}")
     finally:
-        await on_shutdown(bot)
+        await on_shutdown()
 
 if __name__ == "__main__":
     try:

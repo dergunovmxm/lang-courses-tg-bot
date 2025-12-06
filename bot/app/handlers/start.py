@@ -14,7 +14,7 @@ async def handle_start(message: Message):
     user = message.from_user
     
     try:
-        # Сохраняем/обновляем пользователя в Supabase
+        # Сохраняем/обновляем пользователя в базе данных
         db_user = user_crud.get_or_create_user(
             user.id, 
             user.username or "", 
@@ -44,7 +44,7 @@ async def handle_start(message: Message):
                 "Произошла ошибка при сохранении ваших данных. "
                 "Пожалуйста, попробуйте позже."
             )
-        
+
         await message.answer(welcome_text)
         logger.info(f"Пользователь {user.id} запустил бота")
         

@@ -5,7 +5,7 @@ from pathlib import Path
 # load_dotenv()
 
 class Config:
-    BASE_DIR = Path(__file__).parent
+    BASE_DIR = Path(__file__).resolve().parent.parent
     load_dotenv(BASE_DIR / ".env")
     BOT_TOKEN = os.getenv("BOT_TOKEN")
     POSTGRESQL_HOST = os.getenv("POSTGRESQL_HOST")

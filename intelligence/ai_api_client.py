@@ -7,7 +7,8 @@ project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 import bot.database.connection 
 from bot.config import config
-url = 'https://api.intelligence.io.solutions/api/v1/chat/completions'
+print(f'Api {config.API_DEEPSEEK}')
+url = 'https://api.deepseek.com/v1/chat/completions'
 ai_key = config.API_DEEPSEEK
 headers = {
     "Content-Type": "application/json",
@@ -15,7 +16,7 @@ headers = {
 }
 
 data = {
-    'model': 'deepseek-ai/DeepSeek-R1-0528',  
+    'model': 'deepseek-reasoner',  
     'messages': [
         {'role': 'system', 'content': promt_system},
         {'role': 'user', 'content': promt_user}

@@ -2,17 +2,17 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-# load_dotenv()
+load_dotenv()
 
 class Config:
     BASE_DIR = Path(__file__).resolve().parent.parent
-    load_dotenv(BASE_DIR / ".env")
-    BOT_TOKEN = os.getenv("BOT_TOKEN")
-    POSTGRESQL_HOST = os.getenv("POSTGRESQL_HOST")
-    POSTGRESQL_PORT = os.getenv("POSTGRESQL_PORT")
-    POSTGRESQL_USER = os.getenv("POSTGRESQL_USER")
-    POSTGRESQL_PASSWORD = os.getenv("POSTGRESQL_PASSWORD")
-    POSTGRESQL_DBNAME = os.getenv("POSTGRESQL_DBNAME")
+    # load_dotenv(BASE_DIR / ".env")
+    BOT_TOKEN = os.getenv('BOT_TOKEN'
+    POSTGRESQL_HOST = os.getenv('POSTGRESQL_HOST')
+    POSTGRESQL_PORT = os.getenv('POSTGRESQL_PORT')
+    POSTGRESQL_USER = os.getenv('POSTGRESQL_USER')
+    POSTGRESQL_PASSWORD = os.getenv('POSTGRESQL_PASSWORD')
+    POSTGRESQL_DBNAME = os.getenv('POSTGRESQL_DBNAME')
     API_DEEPSEEK = os.getenv('API_DEEPSEEK')
     @classmethod
     def validate(cls):

@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from config import config
+from bot.config import config
 import logging
 from typing import Optional, List, Dict, Any
 

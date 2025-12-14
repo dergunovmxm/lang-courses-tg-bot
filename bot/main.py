@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import asyncio
 from aiogram import Bot, Dispatcher
 from config import Config
@@ -9,6 +12,7 @@ from app.handlers.profile import get_profile_handler
 from utils.startup_utils import show_startup_message
 import logging
 from app.handlers.testing import get_test_handler
+from app.handlers.audio import get_audio_handler
 logger = logging.getLogger(__name__)
 
 # Создание бота и диспетчера
@@ -37,6 +41,7 @@ async def on_startup(bot: Bot):
         dp.include_router(get_timer_handler())
         dp.include_router(get_profile_handler())
         dp.include_router(get_test_handler())
+        dp.include_router(get_audio_handler())
         # Отправка сообщения о запуске (опционально)
         await show_startup_message(bot)
         return True

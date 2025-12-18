@@ -32,10 +32,10 @@ class UserCRUD:
             return None
     
     def create_user(self, telegram_id: int, username: str, first_name: str,
-                    last_name: str = None, language_code: str = 'ru', 
-                    chat_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
-        """Создание нового пользователя"""
+                last_name: str = None, language_code: str = 'ru', 
+                chat_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
         try:
+            now = datetime.utcnow().isoformat()
             user_data = {
                 'telegram_id': telegram_id,
                 'username': username,
@@ -43,21 +43,20 @@ class UserCRUD:
                 'last_name': last_name,
                 'language_code': language_code,
                 'chat_id': chat_id,
-                'created_at': datetime.utcnow().isoformat(),
-                'updated_at': datetime.utcnow().isoformat(),
+                'updated_at': now,
                 'is_active': True
             }
-            
-            # Убираем None значения
+            # Убираем None
             user_data = {k: v for k, v in user_data.items() if v is not None}
-            
-            result = postgresql_client.insert('users', user_data)
+
+            # Передаём created_at отдельно — только для INSERT
+            result = postgresql_client.upsert('users', user_data, 'telegram_id')
             
             if result:
-                logger.info(f"✅ Создан новый пользователь {telegram_id}")
+                logger.info(f"✅ Пользователь {telegram_id} создан/обновлён")
                 return result
-            
-            logger.error(f"❌ Не удалось создать пользователя {telegram_id}")
+                
+            logger.error(f"❌ Не удалось создать/обновить пользователя {telegram_id}")
             return None
             
         except Exception as e:
@@ -218,9 +217,10 @@ class UserSettingsCRUD:
                 'language_level': "beginner",
                 'target_language': "en",
                 'created_at': datetime.utcnow().isoformat(),
-                'updated_at': datetime.utcnow().isoformat()
+                'updated_at': datetime.utcnow().isoformat(),
+                'points': 0
             }
-            result = postgresql_client.insert('user_settings', settings_data)
+            result = postgresql_client.upsert('user_settings', settings_data, 'telegram_id')
             return result
         except Exception as e:
             logger.error(f"Ошибка создания настроек пользователя {telegram_id}: {e}")

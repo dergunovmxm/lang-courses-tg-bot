@@ -10,11 +10,12 @@ The JSON must follow the structure of the "tasks" table in the Supabase database
   "created_at": <ISO 8601 string> // timestamp of creation (e.g. "2025-11-08T12:00:00Z")
   "question": <string>,           // the question text shown to the user
   "answer": <string>,             // the correct answer
-  "solution": <string>,           // short explanation or correct answer details
+  "solution": <string>,           // short explanation or correct answer details necessarily in RUSSIAN LANGUAGE 
   "theme": <string>               // topic of the question (for example: Past Simple/Present Perfect/Passive Voice/Phrasal verbs/Articles)
   "type": <string>,               // one of: "multiple_choice", "open_question", or "translation"
   "level": <string>,     // CEFR level, e.g. "A1", "A2", "B1", "B2", "C1"
   "variants": <jsonb>,  // possible answer options (array of 2–4 strings, or JSON stringified array)
+  "cost": <bigint>, //cost of the curent exercise
 }
 
 🎯 Rules:
@@ -119,9 +120,12 @@ def generate_random_task():
 ]
   rand_top = random.choice(topics)
   rand_lev = random.choice(['A1', 'A2', 'B1', 'B2', 'C1'])
-  promt_user = f'''Generate one English grammar exercise for {rand_lev} level learners on the topic “{rand_top}” with id {cur_id}.
-  You may choose freely between "multiple_choice" and "open_answer" type.
-  If you choose "open_answer":
+  lev_cost = {'A1':10, 'A2':20, 'B1':30, 'B2':40, 'C1':50}
+  rand_type = random.choice(['multiple_choice', 'open_question'])
+  type_cost = {'multiple_choice':1, 'open_question':1.5}
+  promt_user = f'''Generate one English grammar exercise for {rand_lev} level learners on the topic “{rand_top}” with id {cur_id}, with type {rand_type}.
+  cost must be {lev_cost[rand_lev]*type_cost[rand_type]}
+  If you take "open_question":
   - Make sure the question expects a short, clearly defined answer that can be easily checked by a bot.
   - Avoid multiple correct variations.
   Return only the JSON object following the system rules.

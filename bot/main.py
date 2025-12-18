@@ -13,6 +13,7 @@ from utils.startup_utils import show_startup_message
 import logging
 from app.handlers.testing import get_test_handler
 from app.handlers.audio import get_audio_handler
+from app.handlers.task_flow import get_task_handler
 logger = logging.getLogger(__name__)
 
 # Создание бота и диспетчера
@@ -42,6 +43,8 @@ async def on_startup(bot: Bot):
         dp.include_router(get_profile_handler())
         dp.include_router(get_test_handler())
         dp.include_router(get_audio_handler())
+        dp.include_router(get_task_handler())
+        print('include succesfully')
         # Отправка сообщения о запуске (опционально)
         await show_startup_message(bot)
         return True

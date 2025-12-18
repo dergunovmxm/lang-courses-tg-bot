@@ -2,10 +2,10 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from bot.config import config
 import logging
-from typing import Optional, List, Dict, Any
-
+from typing import Optional, List, Dict, Any, Union
+import datetime
 logger = logging.getLogger(__name__)
-
+from psycopg2 import sql
 class PostgreSQLClient:
     def __init__(self):
         self.host = config.POSTGRESQL_HOST
@@ -177,6 +177,93 @@ class PostgreSQLClient:
         except Exception as e:
             logger.error(f"❌ Ошибка подсчета: {e}")
             return 0
+    def get_random_task(self):
+        try:
+            cursor = self._get_cursor()
+            cursor.execute("SELECT * FROM tasks ORDER BY RANDOM() LIMIT 1")
+            result = cursor.fetchone()
+            cursor.close()
+            return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"❌ Ошибка получения рандомного задания: {e}")
+            return None
 
+
+    def upsert(
+        self,
+        table: str,
+        data: Dict[str, Any],
+        conflict_columns: Union[str, List[str]],
+        update_columns: Optional[List[str]] = None,
+        returning: str = "*"
+    ) -> Optional[Dict]:
+        if not self.is_connected:
+            return None
+
+        try:
+            cursor = self._get_cursor()
+
+            # Нормализуем conflict_columns в список
+            if isinstance(conflict_columns, str):
+                conflict_columns = [conflict_columns]
+            if update_columns is None:
+                # Обновляем все поля, кроме конфликтующих
+                update_columns = [col for col in data.keys() if col not in conflict_columns]
+
+            # Экранируем имена таблиц и колонок
+            columns = list(data.keys())
+            col_identifiers = sql.SQL(', ').join(map(sql.Identifier, columns))
+            val_placeholders = sql.SQL(', ').join(sql.Placeholder() * len(columns))
+            table_ident = sql.Identifier(table)
+            conflict_ident = sql.SQL(', ').join(map(sql.Identifier, conflict_columns))
+            update_set = sql.SQL(', ').join(
+                sql.SQL("{} = EXCLUDED.{}").format(sql.Identifier(col), sql.Identifier(col))
+                for col in update_columns
+            )
+            returning_clause = sql.SQL(returning)
+
+            query = sql.SQL("""
+                INSERT INTO {} ({})
+                VALUES ({})
+                ON CONFLICT ({})
+                DO UPDATE SET {}
+                RETURNING {};
+            """).format(
+                table_ident,
+                col_identifiers,
+                val_placeholders,
+                conflict_ident,
+                update_set,
+                returning_clause
+            )
+
+            cursor.execute(query, list(data.values()))
+            result = cursor.fetchone()
+            self.connection.commit()
+            cursor.close()
+
+            return dict(result) if result else None
+
+        except Exception as e:
+            logger.error(f"❌ Ошибка универсального upsert в {table}: {e}")
+            if self.connection:
+                self.connection.rollback()
+            return None
+    def add_points(self, user_id: int, points: int) -> int:
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO users (telegram_id, points)
+                VALUES (%s, %s)
+                ON CONFLICT (telegram_id)
+                DO UPDATE SET points = users.points + EXCLUDED.points
+                RETURNING points
+                """,
+                (user_id, points)
+            )
+            new_points = cursor.fetchone()[0]
+            self.connection.commit()
+            return new_points
 
 postgresql_client = PostgreSQLClient()

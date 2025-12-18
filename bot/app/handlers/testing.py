@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 class TestStates(StatesGroup):
     awaiting_start_confirmation = State()
     in_progress = State()
+    awaiting_start_confirmation = State()
+    awaiting_next_action = State() 
 
 
 async def send_message_with_min_delay(message: Message, text: str, reply_markup=None, min_delay: float = 1.5):

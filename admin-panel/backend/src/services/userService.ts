@@ -1,45 +1,50 @@
-import { User } from "@supabase/supabase-js";
-import { supabase } from "../db";
+import { db } from "../db";
 
 export const userService = {
 
   async getUsers(page: number = 1, limit: number = 10): Promise<any> {
-    const start = (page - 1) * limit;
-    const end = start + limit - 1;
+    try {
+      const offset = (page - 1) * limit;
 
-    const { data: users, error, count } = await supabase
-      .from('users')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(start, end);
+      // Получаем пользователей с пагинацией
+      const usersResult = await db.query(
+        `SELECT * FROM users 
+         ORDER BY created_at DESC 
+         LIMIT $1 OFFSET $2`,
+        [limit, offset]
+      );
 
-    if (error) {
-      throw new Error(`Failed to fetch users: ${error.message}`);
+      // Получаем общее количество пользователей
+      const countResult = await db.query('SELECT COUNT(*) as total FROM users');
+      const totalCount = parseInt(countResult.rows[0].total) || 0;
+      
+      const totalPages = Math.ceil(totalCount / limit);
+
+      return {
+        users: usersResult.rows || [],
+        count: totalCount,
+        page,
+        limit,
+        totalPages
+      };
+    } catch (error) {
+      console.error('Error in getUsers:', error);
+      throw new Error(`Failed to fetch users: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-
-    const totalCount = count || 0;
-    const totalPages = Math.ceil(totalCount / limit);
-
-    return {
-      users: users || [],
-      count: totalCount,
-      page,
-      limit,
-      totalPages
-    };
   },
 
-  async getUserById(id: string): Promise<User> {
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', id)
-      .single();
 
-    if (error) {
-      throw new Error(`User not found: ${error.message}`);
-    }
+  // async getUserById(id: string): Promise<User> {
+  //   const { data: user, error } = await supabase
+  //     .from('users')
+  //     .select('*')
+  //     .eq('id', id)
+  //     .single();
 
-    return user;
-  },
+  //   if (error) {
+  //     throw new Error(`User not found: ${error.message}`);
+  //   }
+
+  //   return user;
+  // },
 } 

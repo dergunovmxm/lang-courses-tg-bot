@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import { db } from './db';
 import routes from './routes/index';
 
 // Загрузка переменных окружения
@@ -10,6 +11,18 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+async function initializeDatabase() {
+  try {
+    await db.connect();
+    console.log('✅ Database connected successfully');
+  } catch (error) {
+    console.error('❌ Failed to connect to database:', error);
+    process.exit(1);
+  }
+}
+
+initializeDatabase();
 
 // Список разрешенных origins
 const allowedOrigins = [

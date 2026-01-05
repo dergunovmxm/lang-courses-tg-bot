@@ -1,17 +1,12 @@
 // dashboardService.ts
-import { supabase } from "../db";
+import { db } from "../db";
 
 export const dashboardService = {
   async getDashboardOverview(): Promise<any> {
     try {
       // Получаем общее количество пользователей
-      const { count: totalUsers, error: usersError } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true });
-
-      if (usersError) {
-        throw new Error(`Failed to get users count: ${usersError.message}`);
-      }
+      const totalUsersResult = await db.query('SELECT COUNT(*) as count FROM users');
+      const totalUsers = parseInt(totalUsersResult.rows[0].count) || 0;
 
       // Получаем статистику за текущий месяц
       const currentMonthStats = await this.getCurrentMonthStats();
@@ -20,13 +15,13 @@ export const dashboardService = {
       const previousMonthStats = await this.getPreviousMonthStats();
 
       // Рассчитываем прирост
-      const growthRate = await this.calculateGrowthRate(previousMonthStats.count, currentMonthStats.count);
+      const growthRate = currentMonthStats.count - previousMonthStats.count;
 
       return {
-        totalUsers: totalUsers || 0,
-        currentMonthUsers: currentMonthStats.count || 0,
-        previousMonthUsers: previousMonthStats.count || 0,
-        growthRate: growthRate,
+        totalUsers: totalUsers,
+        currentMonthUsers: currentMonthStats.count,
+        previousMonthUsers: previousMonthStats.count,
+        // growthRate: growthRate,
         growthPercentage: previousMonthStats.count > 0 
           ? ((growthRate / previousMonthStats.count) * 100).toFixed(2)
           : currentMonthStats.count > 0 ? 100 : 0,
@@ -46,32 +41,30 @@ export const dashboardService = {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const { count: newUsers, error } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', thirtyDaysAgo.toISOString());
+      const newUsersResult = await db.query(
+        'SELECT COUNT(*) as count FROM users WHERE created_at >= $1',
+        [thirtyDaysAgo.toISOString()]
+      );
 
-      if (error) {
-        throw new Error(`Failed to get users growth: ${error.message}`);
-      }
+      const newUsers = parseInt(newUsersResult.rows[0].count) || 0;
 
       // Получаем данные за предыдущий 30-дневный период
       const sixtyDaysAgo = new Date();
       sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
       
-      const { count: previousPeriodUsers } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', sixtyDaysAgo.toISOString())
-        .lt('created_at', thirtyDaysAgo.toISOString());
+      const previousPeriodResult = await db.query(
+        'SELECT COUNT(*) as count FROM users WHERE created_at >= $1 AND created_at < $2',
+        [sixtyDaysAgo.toISOString(), thirtyDaysAgo.toISOString()]
+      );
+      const previousPeriodUsers = parseInt(previousPeriodResult.rows[0].count) || 0;
 
-      const growthRate = await this.calculateGrowthRate(previousPeriodUsers || 0, newUsers || 0);
+      const growthRate = newUsers - previousPeriodUsers;
 
       return {
         newUsersLast30Days: newUsers || 0,
         previousPeriodUsers: previousPeriodUsers || 0,
-        growthRate: growthRate,
-        growthPercentage: previousPeriodUsers && previousPeriodUsers > 0 
+        growthRate,
+        growthPercentage: previousPeriodUsers > 0 
           ? ((growthRate / previousPeriodUsers) * 100).toFixed(2)
           : newUsers && newUsers > 0 ? 100 : 0
       };
@@ -85,15 +78,12 @@ export const dashboardService = {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
-    const { count, error } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', startOfMonth.toISOString())
-      .lte('created_at', endOfMonth.toISOString());
+    const result = await db.query(
+      'SELECT COUNT(*) as count FROM users WHERE created_at BETWEEN $1 AND $2',
+      [startOfMonth.toISOString(), endOfMonth.toISOString()]
+    );
 
-    if (error) {
-      throw new Error(`Failed to get current month stats: ${error.message}`);
-    }
+    const count = parseInt(result.rows[0].count) || 0;
 
     return {
       count: count || 0,
@@ -107,15 +97,11 @@ export const dashboardService = {
     const startOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfPreviousMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
 
-    const { count, error } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', startOfPreviousMonth.toISOString())
-      .lte('created_at', endOfPreviousMonth.toISOString());
-
-    if (error) {
-      throw new Error(`Failed to get previous month stats: ${error.message}`);
-    }
+    const result = await db.query(
+      'SELECT COUNT(*) as count FROM users WHERE created_at BETWEEN $1 AND $2',
+      [startOfPreviousMonth.toISOString(), endOfPreviousMonth.toISOString()]
+    );
+    const count = parseInt(result.rows[0].count) || 0;
 
     return {
       count: count || 0,
@@ -124,11 +110,7 @@ export const dashboardService = {
     };
   },
 
-  async calculateGrowthRate(previousCount: number, currentCount: number): Promise<number> {
-    return currentCount - previousCount;
-  },
-
-  // Дополнительные методы для расширенной аналитики
+  // // Дополнительные методы для расширенной аналитики
   async getUsersGrowthTimeline(months: number = 6): Promise<any> {
     const timeline = [];
     
@@ -139,12 +121,12 @@ export const dashboardService = {
       const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
       const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
 
-      const { count } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', startOfMonth.toISOString())
-        .lte('created_at', endOfMonth.toISOString());
-
+      const result = await db.query(
+        'SELECT COUNT(*) as count FROM users WHERE created_at BETWEEN $1 AND $2',
+        [startOfMonth.toISOString(), endOfMonth.toISOString()]
+      );
+      const count = parseInt(result.rows[0].count) || 0;
+      
       timeline.unshift({
         month: startOfMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
         count: count || 0,
@@ -163,22 +145,25 @@ export const dashboardService = {
     startDate.setDate(startDate.getDate() - lastDays);
 
     // Для daily статистики лучше использовать более сложный запрос с группировкой по дате
-    const { data, error } = await supabase
-      .from('users')
-      .select('created_at')
-      .gte('created_at', startDate.toISOString())
-      .order('created_at', { ascending: true });
+    const result = await db.query(
+      `SELECT 
+        DATE(created_at) as date,
+        COUNT(*) as registrations
+       FROM users 
+       WHERE created_at >= $1
+       GROUP BY DATE(created_at)
+       ORDER BY date ASC`,
+      [startDate.toISOString()]
+    );
 
-    if (error) {
-      throw new Error(`Failed to get daily registrations: ${error.message}`);
-    }
-
-    // Группируем по дням
+    // Преобразуем в объект с датами как ключами
     const dailyStats: { [key: string]: number } = {};
+    let totalInPeriod = 0;
     
-    data?.forEach(user => {
-      const date = new Date(user.created_at).toISOString().split('T')[0];
-      dailyStats[date] = (dailyStats[date] || 0) + 1;
+    result.rows.forEach(row => {
+      const dateStr = new Date(row.date).toISOString().split('T')[0];
+      dailyStats[dateStr] = parseInt(row.registrations);
+      totalInPeriod += parseInt(row.registrations);
     });
 
     return {
@@ -186,7 +171,7 @@ export const dashboardService = {
       startDate: startDate.toISOString(),
       endDate: new Date().toISOString(),
       dailyRegistrations: dailyStats,
-      totalInPeriod: data?.length || 0
+      totalInPeriod
     };
   }
 }

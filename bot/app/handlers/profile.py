@@ -19,8 +19,9 @@ async def handle_profile(message: Message):
         # Получаем или создаем пользователя
         db_user = user_crud.get_user_by_telegram_id(user.id)
         if not db_user:
-            await message.answer("❌ Произошла ошибка при загрузке профиля")
-            return
+            #await message.answer("❌ Произошла ошибка при загрузке профиля")
+            #return
+            db_user = user_crud.create_user(user.id, user.username, user.first_name, user.last_name)
 
         # Получаем настройки
         settings = settings_crud.get_settings(user.id)
@@ -44,6 +45,7 @@ async def handle_profile(message: Message):
             profile_text += f"⏰ Напоминание: {settings.get('daily_reminder_time', '-')}\n"
             profile_text += f"🎯 Уровень: {settings.get('language_level', '-')}\n"
             profile_text += f"🌍 Язык: {settings.get('target_language', '-')}\n\n"
+            profile_text += f"📊 <b>Поинты: {db_user.get('points', 0)}</b>"
         
         await message.answer(profile_text, parse_mode='HTML')
         

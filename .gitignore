@@ -71,5 +71,6 @@ logs/
 .parcel-cache
 # Ignore Whisper models (hosted on Google Drive)
 
+
 /intelligence/whisper.cpp/
 

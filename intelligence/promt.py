@@ -17,22 +17,20 @@ The JSON must follow the structure of the "tasks" table in the Supabase database
   "variants": <jsonb>,  // possible answer options (array of 2–4 strings, or JSON stringified array)
   "cost": <bigint>, //cost of the curent exercise
 }
-
 🎯 Rules:
 1. Always return **only a valid JSON object**, with no extra text, comments, or Markdown formatting.
 2. The JSON must strictly follow the schema below.
 3. The exercise should be clear, natural, and solvable by a typical English learner.
-4. Randomly choose the task type: sometimes “multiple_choice”, sometimes “open_answer”.
-5. When generating “open_answer” tasks:
+4. When generating “open_answer” tasks:
    - The question must have a **short, unambiguous answer** (1–3 words or a short phrase).
    - Avoid subjective or stylistic answers.
    - Prefer questions that can be automatically checked (e.g. verb forms, short translations, fill-in-the-blank).
    - The correct answer should be written in its most natural and typical form.
-6. “multiple_choice” tasks must have **4 answer variants**, only one of which is correct.
-7. Include a short, clear explanation of the correct answer in the “solution” field.
-8. Dates must use ISO 8601 format (e.g. `"2025-11-08T12:00:00Z"`).
-9. Difficulty and language_level should match the content.
-
+5. “multiple_choice” tasks must have **4 answer variants**, only one of which is correct.
+6. Include a short, clear explanation of the correct answer in the “solution” field.
+7. Dates must use ISO 8601 format (e.g. `"2025-11-08T12:00:00Z"`).
+8. Difficulty and language_level should match the content.
+9. In the "question" column, first give a short instruction on what needs to be done and the task itself.
 📘 Example task (your output should look like this, but with different content):
 
 {

@@ -90,18 +90,23 @@ class PostgreSQLClient:
                 self.connection.rollback()
             return None
     
-    def select(self, table: str, limit: int = 15) -> List[Dict]:
-        """Выборка данных"""
+    def select(self, table: str, limit: int | None = None) -> List[Dict]:
         try:
             cursor = self._get_cursor()
-            query = f"SELECT * FROM {table} LIMIT %s"
-            cursor.execute(query, (limit,))
+
+            if limit is None:
+                query = f"SELECT * FROM {table}"
+                cursor.execute(query)
+            else:
+                query = f"SELECT * FROM {table} LIMIT %s"
+                cursor.execute(query, (limit,))
+
             results = cursor.fetchall()
             cursor.close()
             return [dict(row) for row in results]
+
         except Exception as e:
             logger.error(f"❌ Ошибка выборки: {e}")
-            print(f"❌ Ошибка выборки: {e}")
             return []
     
     def update(self, table: str, filters: Dict[str, Any], data: dict) -> Optional[Dict]:

@@ -243,6 +243,29 @@ class UserSettingsCRUD:
         except Exception as e:
             logger.error(f"Ошибка обновления настроек уведомлений {telegram_id}: {e}")
             return None
+    @staticmethod
+    def update_language_level(user_id: int, level: str):
+        try:
+            cursor = postgresql_client._get_cursor()
+            cursor.execute(
+                """
+                UPDATE user_settings
+                SET language_level = %s
+                WHERE telegram_id = %s
+                """,
+                (level, user_id)
+            )
+            postgresql_client.connection.commit()
+            cursor.close()
 
+            logger.info(
+                f"✅ language_level обновлён: user_id={user_id}, level={level}"
+            )
+
+        except Exception as e:
+            logger.error(
+                f"❌ Ошибка обновления уровня языка: {e}",
+                exc_info=True
+            )
 user_crud = UserCRUD()
 settings_crud = UserSettingsCRUD()

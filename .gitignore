@@ -70,4 +70,4 @@ logs/
 .eslintcache
 .parcel-cache
 # Ignore Whisper models (hosted on Google Drive)
-intelligence/whisper.cpp/
+/intelligence/whisper.cpp/

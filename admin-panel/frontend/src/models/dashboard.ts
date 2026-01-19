@@ -1,4 +1,4 @@
-export interface Timeline {
+export type Timeline = {
   month: string, 
   count: number,
   period:{
@@ -7,7 +7,7 @@ export interface Timeline {
   }
 }
 
-export interface Overview {
+export type Overview = {
   totalUsers: number;
   currentMonthUsers: number;
   previousMonthUsers: number;
@@ -20,7 +20,7 @@ export interface Overview {
   lastUpdated: string;
 }
 
-export interface Daily {
+export type Daily = {
   period: number;
   startDate: string;
   endDate: string;
@@ -28,7 +28,7 @@ export interface Daily {
   totalInPeriod: number;
 }
 
-export interface Growth {
+export type Growth =  {
   newUsersLast30Days: number;
   previousPeriodUsers: number;
   growthRate: number;

@@ -1,17 +1,33 @@
 import { useNavigate } from "react-router-dom";
-import { Layout, Menu } from "antd";
+import { Button, Layout, Menu } from "antd";
 import { menuItems } from "./const";
+import { useState } from "react";
+
+const { Sider } = Layout;
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { Sider } = Layout;
+
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleMenuClick = ({ key }: { key: string }) => {
     navigate(key);
   };
 
   return (
-    <Sider width={250}>
+    <Sider
+      width={250}
+      collapsible
+      collapsed={collapsed}
+      onCollapse={(value) => setCollapsed(value)}
+      style={{
+        overflow: "auto",
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        left: 0,
+      }}
+    >
       <Menu
         mode="inline"
         defaultSelectedKeys={["1"]}

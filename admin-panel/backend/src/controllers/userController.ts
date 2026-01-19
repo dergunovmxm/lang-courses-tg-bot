@@ -7,7 +7,6 @@ export const userController = {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const search = req.query.search as string;
-
       const result = await userService.getUsers(page, limit);
 
       // TODO добавить когда будет поиск
@@ -16,16 +15,10 @@ export const userController = {
       // } else {
       //   result = await userService.getUsers(page, limit);
       // }
-      res.json({
-        success: true,
-        data: result
-      });
+      res.json({ success: true, data: result });
     } catch (error: any) {
       console.error('Error in getUsers:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message
-      });
+      res.status(500).json({ success: false, error: error.message });
     }
   },
 }

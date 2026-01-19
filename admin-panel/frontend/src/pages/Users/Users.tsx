@@ -9,12 +9,10 @@ const { Title } = Typography;
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [tableLoading, setTableLoading] = useState(false);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      setTableLoading(true);
 
       const response = await fetch("http://localhost:3001/api/users", {
         headers: {
@@ -40,7 +38,6 @@ const Users = () => {
       message.error("Не удалось загрузить пользователей");
     } finally {
       setLoading(false);
-      setTableLoading(false);
     }
   };
 
@@ -74,7 +71,7 @@ const Users = () => {
         columns={columns}
         dataSource={users}
         rowKey="id"
-        loading={tableLoading}
+        loading={loading}
         scroll={{ x: 1200 }}
         pagination={{
           pageSize: 10,

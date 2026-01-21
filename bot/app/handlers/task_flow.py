@@ -12,6 +12,7 @@ from database.connection import postgresql_client
 import json
 import logging
 from .testing import TestStates
+from database.crud import settings_crud
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +23,15 @@ router = Router(name="task_flow_router")
 # /task — отправка задания
 # ============================
 @router.message(F.text == "/task")
-async def send_random_task(message: Message, state: FSMContext):
+async def send_task(message: Message, state: FSMContext):
     await state.clear()
-
-    task = postgresql_client.get_random_task()
+    user = message.from_user
+    settings = settings_crud.get_settings(user.id)
+    if not settings:
+        settings = settings_crud.create_default_settings(user.id)
+    level = settings.get('language_level', 0)
+    db_level = 'A1' if level == 'beginner' else level
+    task = postgresql_client.get_task_by_level(db_level)
 
     if not task:
         await message.answer(
@@ -151,7 +157,8 @@ async def check_answer(message: Message, state: FSMContext):
 @router.callback_query(F.data == "next_task", TestStates.awaiting_next_action)
 async def handle_next_task(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
-    await send_random_task(callback.message, state)
+    await send_task(callback.message, state)
+   
 
 
 @router.callback_query(F.data == "stop_task", TestStates.awaiting_next_action)

@@ -199,13 +199,19 @@ class UserCRUD:
 class UserSettingsCRUD:
     def get_settings(self, telegram_id: int) -> Optional[Dict[str, Any]]:
         try:
-            result = postgresql_client.select('user_settings', limit=1)
-            for s in result:
-                if s.get("telegram_id") == telegram_id:
-                    return s
-            return None
+            cursor = postgresql_client._get_cursor()
+            cursor.execute(
+                "SELECT * FROM user_settings WHERE telegram_id = %s LIMIT 1",
+                (telegram_id,)
+            )
+            row = cursor.fetchone()
+            cursor.close()
+            return dict(row) if row else None
         except Exception as e:
             logger.error(f"Ошибка получения настроек пользователя {telegram_id}: {e}")
+            # Убедитесь, что курсор закрыт даже при ошибке
+            if 'cursor' in locals():
+                cursor.close()
             return None
 
     def create_default_settings(self, telegram_id: int) -> Optional[Dict[str, Any]]:

@@ -192,7 +192,17 @@ class PostgreSQLClient:
         except Exception as e:
             logger.error(f"❌ Ошибка получения рандомного задания: {e}")
             return None
-
+    def get_task_by_level(self, level):
+        try: 
+            cursor = self._get_cursor()
+            cursor.execute('SELECT * FROM tasks WHERE level = %s ORDER BY RANDOM() LIMIT 1;',
+                           (level,))
+            result = cursor.fetchone()
+            cursor.close()
+            return dict(result) if result else None
+        except Exception as e:
+            logger.error(f'Ошибка получения задания уровня {level}: {e}')
+            return None
 
     def upsert(
         self,

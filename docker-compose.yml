@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # PostgreSQL База данных
+  postgres:
+    image: postgres:15-alpine
+    container_name: lang_courses_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lang_courses}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - lang_courses_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Admin Panel (Backend + Frontend)
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    container_name: lang_courses_admin
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lang_courses}
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lang_courses_network
+
+  # Telegram Bot
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    container_name: lang_courses_bot
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lang_courses}
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      intelligence:
+        condition: service_started
+    volumes:
+      # Если нужно сохранять логи или данные
+      - ./logs:/app/logs
+    networks:
+      - lang_courses_network
+
+  # Intelligence (AI модули)
+  intelligence:
+    build:
+      context: .
+      dockerfile: Dockerfile.intelligence
+    container_name: lang_courses_intelligence
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      # Если AI модели хранятся локально
+      - ./models:/app/models
+    networks:
+      - lang_courses_network
+
+networks:
+  lang_courses_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

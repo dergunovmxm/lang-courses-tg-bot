@@ -280,5 +280,15 @@ class PostgreSQLClient:
             new_points = cursor.fetchone()[0]
             self.connection.commit()
             return new_points
+    def get_audio_task(self):
+        try:
+            cursor = self._get_cursor()
+            cursor.execute("SELECT * FROM tasks WHERE type = 'audio_question' ORDER BY RANDOM() LIMIT 1;")
+            result = cursor.fetchone()
+            cursor.close()
+            return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"❌ Ошибка получения рандомного задания: {e}")
+            return None
 
 postgresql_client = PostgreSQLClient()

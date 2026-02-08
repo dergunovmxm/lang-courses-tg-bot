@@ -3,10 +3,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import path from 'path';
 import { db } from './db';
 import routes from './routes/index';
 
-// Загрузка переменных окружения
 dotenv.config();
 
 const app = express();
@@ -24,7 +24,6 @@ async function initializeDatabase() {
 
 initializeDatabase();
 
-// Список разрешенных origins
 const allowedOrigins = [
   process.env.CLIENT_URL,
   'http://localhost:3000',
@@ -35,7 +34,6 @@ const allowedOrigins = [
   'https://127.0.0.1:3000'
 ].filter(Boolean);
 
-// CORS configuration
 const corsOptions = {
   origin: true, 
   credentials: true,
@@ -61,7 +59,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" } // Важно для CORS
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
 app.use(morgan('combined'));
@@ -76,31 +74,6 @@ app.use(express.urlencoded({
 }));
 
 app.options('*', cors(corsOptions));
-
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to GradeUp API! 🚀',
-    version: '1.0.0',
-    timestamp: new Date().toISOString(),
-    cors: {
-      enabled: true,
-      allowed_origins: allowedOrigins
-    },
-    endpoints: {
-      health: '/health',
-      api: {
-        users: {
-          'GET /api/users': 'Get all users',
-          'GET /api/users/:id': 'Get user by ID',
-          'POST /api/users': 'Create new user'
-        }
-      }
-    },
-    documentation: 'Check /health for service status'
-  });
-});
-
-app.use('/api', routes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ 
@@ -128,30 +101,17 @@ app.get('/test', (req, res) => {
   });
 });
 
-app.get('/favicon.ico', (req, res) => {
-  res.status(204).end();
-});
+app.use('/api', routes);
 
-app.use('*', (req, res) => {
-  res.status(404).json({ 
-    success: false,
-    error: 'Route not found',
-    path: req.originalUrl,
-    method: req.method,
-    available_endpoints: [
-      'GET /',
-      'GET /health',
-      'GET /test',
-      'GET /api/users',
-    ],
-    timestamp: new Date().toISOString()
-  });
+app.use(express.static(path.join(__dirname, '../public')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err.message);
   
-  // Обработка CORS ошибок
   if (err.message === 'Not allowed by CORS') {
     return res.status(403).json({ 
       success: false,
@@ -170,7 +130,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log('='.repeat(60));
   console.log(`🚀 GradeUp API Server started successfully!`);

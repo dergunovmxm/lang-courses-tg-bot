@@ -8,7 +8,7 @@ import json
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
-from promt import promt_system, generate_random_task
+from promt import promt_system, generate_random_task, generate_audio_task
 import bot.database.connection 
 from bot.config import config
 
@@ -21,7 +21,7 @@ headers = {
 }
 
 # Сколько заданий сгенерировать
-NUM_TASKS = 15
+NUM_TASKS = 5
 
 print(f"🚀 Начинаем генерацию {NUM_TASKS} заданий (строгий режим: остановка при первой ошибке)...")
 
@@ -33,7 +33,7 @@ for i in range(NUM_TASKS):
         'model': 'deepseek-reasoner',
         'messages': [
             {'role': 'system', 'content': promt_system},
-            {'role': 'user', 'content': generate_random_task()}
+            {'role': 'user', 'content': generate_audio_task()}
         ],
     }
 

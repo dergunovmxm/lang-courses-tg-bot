@@ -53,7 +53,7 @@ async def transcribe_audio_v2(bot, voice: Voice) -> str:
         cmd_whisper = [
             WHISPER_EXECUTABLE,
             "-m", model_path,
-            "-l", "ru",
+            "-l", "en",
             "--no-timestamps",
             "-f", tmp_wav_path
         ]
@@ -69,3 +69,4 @@ async def transcribe_audio_v2(bot, voice: Voice) -> str:
         for path in (tmp_ogg_path, tmp_wav_path):
             if os.path.exists(path):
                 os.remove(path)
+                

@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 import requests
-from promt import promt_system, generate_random_task
+from promt import promt_system, generate_random_task, generate_audio_task
 import json
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
@@ -18,7 +18,7 @@ data = {
     'model': 'deepseek-reasoner',  
     'messages': [
         {'role': 'system', 'content': promt_system},
-        {'role': 'user', 'content': generate_random_task()}
+        {'role': 'user', 'content': generate_audio_task()}
     ],
 }
 

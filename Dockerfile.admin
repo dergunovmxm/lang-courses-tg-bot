@@ -5,13 +5,9 @@ FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
-# Копируем package files для frontend
 COPY admin-panel/frontend/package*.json ./
-
-# Устанавливаем зависимости
 RUN npm install --legacy-peer-deps
 
-# Копируем исходники frontend
 COPY admin-panel/frontend/ ./
 
 ENV CI=true
@@ -27,16 +23,10 @@ FROM node:18-alpine AS backend-builder
 
 WORKDIR /app/backend
 
-# Копируем package files для backend
 COPY admin-panel/backend/package*.json ./
-
-# Устанавливаем зависимости
 RUN npm install --legacy-peer-deps
 
-# Копируем исходники backend
 COPY admin-panel/backend/ ./
-
-# Компилируем TypeScript
 RUN npm run build
 
 # Stage 3: Production
@@ -44,24 +34,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Устанавливаем только production зависимости
 COPY admin-panel/backend/package*.json ./
 RUN npm install --legacy-peer-deps
 
-# Копируем скомпилированный backend
 COPY --from=backend-builder /app/backend/dist ./dist
-
-# Копируем собранный frontend
 COPY --from=frontend-builder /app/frontend/dist ./public
 
-COPY .env .env
+# .env убран — секреты передаются через env_file в docker-compose.yml
 
-# Переменные окружения
 ENV NODE_ENV=production
 ENV PORT=3001
 
-# Открываем порт
 EXPOSE 3001
 
-# Запускаем backend (который будет отдавать статику frontend)
 CMD ["node", "dist/index.js"]

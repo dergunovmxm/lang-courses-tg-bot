@@ -1,21 +1,25 @@
-
 FROM python:3.13-slim
 
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libpq5 \
-    && rm -rf /var/lib/apt/lists/*
+# Системные зависимости с retry для нестабильных зеркал
+RUN for i in 1 2 3; do \
+        apt-get clean && \
+        rm -rf /var/lib/apt/lists/* && \
+        apt-get update && \
+        apt-get install -y --no-install-recommends --fix-missing \
+            libpq5 \
+            ffmpeg && \
+        break || \
+        echo "Attempt $i failed, retrying in 10s..." && \
+        sleep 10; \
+    done && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY .env .env
-
 COPY bot/ ./bot/
-
 COPY intelligence/ ./intelligence/
 
 ENV PYTHONUNBUFFERED=1

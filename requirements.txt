@@ -1,7 +1,24 @@
-aiogram==3.17.0
-python-dotenv==1.0.0
-magic-filter>=1.0.9
-requests==2.31.0
-httpx==0.25.2
-python-dateutil==2.8.2
-psycopg2-binary>=2.9.0
+# Telegram бот
+aiogram==3.22.0
+aiofiles==24.1.0
+
+# Транскрибация
+faster-whisper==1.2.1
+ctranslate2==4.6.2
+onnxruntime==1.23.2
+huggingface_hub==1.2.3
+
+# Аудио
+soundfile==0.13.1
+numpy==2.3.3
+
+# БД
+psycopg2-binary==2.9.11
+
+# Утилиты
+python-dotenv==1.1.1
+pydantic==2.11.9
+requests==2.32.5
+httpx==0.28.1
+PyYAML==6.0.3
+cryptography==46.0.3

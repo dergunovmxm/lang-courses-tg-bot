@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL База данных
   postgres:
     image: postgres:15-alpine
     container_name: lang_courses_db
@@ -22,7 +21,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Admin Panel (Backend + Frontend)
   admin:
     build:
       context: .
@@ -32,9 +30,9 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lang_courses}
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lang_courses}
     env_file:
       - .env
     depends_on:
@@ -43,7 +41,6 @@ services:
     networks:
       - lang_courses_network
 
-  # Telegram Bot
   bot:
     build:
       context: .
@@ -51,37 +48,26 @@ services:
     container_name: lang_courses_bot
     restart: unless-stopped
     environment:
-      - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lang_courses}
+      PYTHONUNBUFFERED: 1
+      PYTHONPATH: /app:/app/bot
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lang_courses}
     env_file:
       - .env
     depends_on:
       postgres:
         condition: service_healthy
-      intelligence:
-        condition: service_started
     volumes:
-      # Если нужно сохранять логи или данные
       - ./logs:/app/logs
+      - whisper_cache:/root/.cache/huggingface
     networks:
       - lang_courses_network
-
-  # Intelligence (AI модули)
-  intelligence:
-    build:
-      context: .
-      dockerfile: Dockerfile.intelligence
-    container_name: lang_courses_intelligence
-    restart: unless-stopped
-    environment:
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
-    volumes:
-      # Если AI модели хранятся локально
-      - ./models:/app/models
-    networks:
-      - lang_courses_network
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          memory: 1G
 
 networks:
   lang_courses_network:
@@ -89,4 +75,4 @@ networks:
 
 volumes:
   postgres_data:
-    driver: local
+  whisper_cache:

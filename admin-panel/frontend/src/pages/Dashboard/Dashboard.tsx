@@ -24,7 +24,7 @@ const Dashboard: React.FC = () => {
       setError(null);
 
       const response = await fetch(
-        "http://localhost:3001/api/dashboard/summary",
+        `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/api/dashboard/summary`,
         {
           headers: {
             "Content-Type": "application/json",

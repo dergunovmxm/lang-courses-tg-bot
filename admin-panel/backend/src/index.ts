@@ -58,9 +58,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+// app.use(helmet({
+//   crossOriginResourcePolicy: { policy: "cross-origin" }
+// }));
+
 
 app.use(morgan('combined'));
 
@@ -103,10 +104,12 @@ app.get('/test', (req, res) => {
 
 app.use('/api', routes);
 
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  if (!req.path.startsWith('/api') && !req.path.startsWith('/health') && !req.path.startsWith('/test')) {
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  }
 });
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

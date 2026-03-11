@@ -136,12 +136,13 @@ def generate_audio_task():
     cur_id = int(f.read().strip())
   rand_lev = random.choice(['A1', 'A2', 'B1', 'B2', 'C1'])
   lev_cost = {'A1':10, 'A2':20, 'B1':30, 'B2':40, 'C1':50}
-  promt_user = f'''Write a short text in English (30-40 words) at level {rand_lev} on an interesting, real-life topic. 
+  promt_user = f'''Write a short text in English (30-40 words) on an interesting, unique topic (not about AI). 
     Use natural vocabulary and a clear sentence structure appropriate to the level. 
     In the "variants" column, list 10 keywords from the text that are essential for understanding the content—these will be used to assess user's reading comprehension.
     The "question" column should contain only instructions (Read the following text aloud:) and text for reading.
     Do not generate any questions for the assignment and do not use '\\n' in the text.
     Cost must be: {lev_cost[rand_lev]*2}.
+    Language level must be: {rand_lev}
     ID must be: {cur_id}.
     'answer', 'solution' and 'theme' must be empty.
     type must be: audio_question.

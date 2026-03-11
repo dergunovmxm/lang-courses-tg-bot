@@ -16,7 +16,7 @@ const Users = () => {
       setLoading(true);
       setTableLoading(true);
 
-      const response = await fetch("http://localhost:3001/api/users", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/users`, {
         headers: {
           "Content-Type": "application/json",
         },

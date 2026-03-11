@@ -35,7 +35,7 @@ async def handle_start(message: Message):
         await message.answer(
             f"Привет, {user.first_name}! 👋\n"
             "Добро пожаловать в GradeUp 🎓\n\n"
-            "Мы поможем тебе прокачать иностранные языки 💪\n\n"
+            "Мы поможем тебе прокачать твой английский 💪\n\n"
             "📌 Основные команды:\n"
             "/task — задание дня\n"
             "/profile — мой профиль\n"

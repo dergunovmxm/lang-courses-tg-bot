@@ -90,17 +90,19 @@ class PostgreSQLClient:
                 self.connection.rollback()
             return None
     
-    def select(self, table: str, limit: int | None = None) -> List[Dict]:
+    def select(self, table: str, condition: str | None = None, limit: int | None = None) -> List[Dict]:
         try:
             cursor = self._get_cursor()
-
-            if limit is None:
-                query = f"SELECT * FROM {table}"
-                cursor.execute(query)
-            else:
-                query = f"SELECT * FROM {table} LIMIT %s"
-                cursor.execute(query, (limit,))
-
+            
+            query = f"SELECT * FROM {table}"
+            
+            if condition:
+                query += f" WHERE {condition}"
+            
+            if limit:
+                query += f" LIMIT {limit}"
+            
+            cursor.execute(query)
             results = cursor.fetchall()
             cursor.close()
             return [dict(row) for row in results]
@@ -280,15 +282,21 @@ class PostgreSQLClient:
             new_points = cursor.fetchone()[0]
             self.connection.commit()
             return new_points
-    def get_audio_task(self):
+    def get_audio_task(self, level: str = None):
         try:
             cursor = self._get_cursor()
-            cursor.execute("SELECT * FROM tasks WHERE type = 'audio_question' ORDER BY RANDOM() LIMIT 1;")
+            if level:
+                cursor.execute(
+                    "SELECT * FROM tasks WHERE type = 'audio_question' AND level = %s ORDER BY RANDOM() LIMIT 1;",
+                    (level,)
+                )
+            else:
+                cursor.execute("SELECT * FROM tasks WHERE type = 'audio_question' ORDER BY RANDOM() LIMIT 1;")
             result = cursor.fetchone()
             cursor.close()
             return dict(result) if result else None
         except Exception as e:
-            logger.error(f"❌ Ошибка получения рандомного задания: {e}")
+            logger.error(f"❌ Ошибка получения аудиозадания: {e}")
             return None
 
 postgresql_client = PostgreSQLClient()

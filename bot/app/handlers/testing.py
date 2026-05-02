@@ -39,7 +39,15 @@ async def send_message_with_min_delay(
 
 
 async def load_tasks_from_db():
-    tasks = postgresql_client.select("tasks")
+    # TODO: ПРОВЕРИТЬ
+    # Было в ветке main
+    # tasks = postgresql_client.select("tasks")
+
+    # Пришло из ветки task_level
+    tasks = postgresql_client.select(
+        "tasks",
+        condition="type != 'audio_question'"
+    )
 
     logger.error("=== DEBUG TASKS ===")
     logger.error(f"TOTAL FROM PYTHON: {len(tasks)}")
@@ -63,7 +71,12 @@ def select_random_tasks(tasks, count_per_level=3):
 
     for level in levels:
         # фильтруем по нормализованному уровню
-        level_tasks = [t for t in tasks if normalize_level(t.get("level")) == level]
+        # TODO: ПРОВЕРИТЬ
+        # Было в ветке main
+        # level_tasks = [t for t in tasks if normalize_level(t.get("level")) == level]
+
+        # Пришло из ветки task_level
+        level_tasks = [t for t in tasks if normalize_level(t.get("level")) == level and t.get("type") != "audio_question"]
         if len(level_tasks) < count_per_level:
             logger.warning(f"Не хватает заданий уровня {level}, есть {len(level_tasks)}")
         selected.extend(random.sample(level_tasks, min(count_per_level, len(level_tasks))))

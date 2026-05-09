@@ -140,14 +140,21 @@ class SessionMembersCRUD:
         except Exception as e:
             logger.error(f"❌ Ошибка обновления роли: {e}")
             return None
-    def get_sessions_by_user_id(user_id: int) -> List[SessionMember]:
+    def get_sessions_by_user_id(self, user_id: int) -> List[str]:
         try:
-            result = postgresql_client.select('session_members', f"user_id = '{user_id}'")
-            if result and len(result) > 0:
-                return Session.from_dict(result[0])
-                
+            cursor = postgresql_client._get_cursor()
+            
+            query = "SELECT session_id FROM session_members WHERE user_id = %s"
+            cursor.execute(query, (user_id,)) 
+            
+            results = cursor.fetchall()
+            cursor.close()
+            
+            return [row['session_id'] for row in results]
+                    
         except Exception as e:
-            logger.error('Ошибка получения списка сессий')
+            logger.error(f'❌ Ошибка получения списка сессий для пользователя {user_id}: {e}')
+            return []
 def cleanup_expired_sessions(days: int = 30) -> int:
 
     expired_sessions = SessionCRUD.get_expired_sessions(days)

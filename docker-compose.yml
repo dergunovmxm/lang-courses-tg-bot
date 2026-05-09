@@ -69,6 +69,36 @@ services:
         reservations:
           memory: 1G
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: lang_courses_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONUNBUFFERED: 1
+      PYTHONPATH: /app:/app/bot
+
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-lang_courses}
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+   
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      WEBHOOK_API_KEY: ${WEBHOOK_API_KEY}
+   
+      BOT_WEBHOOK_URL: http://api:8000/webhook
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lang_courses_network
+
 networks:
   lang_courses_network:
     driver: bridge

@@ -82,13 +82,7 @@ services:
     environment:
       PYTHONUNBUFFERED: 1
       PYTHONPATH: /app:/app/bot
-
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB:-lang_courses}
-      DB_USER: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-   
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lang_courses}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       WEBHOOK_API_KEY: ${WEBHOOK_API_KEY}
    

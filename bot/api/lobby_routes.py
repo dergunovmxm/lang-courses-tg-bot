@@ -1,8 +1,11 @@
+
 from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel
 from bot.database.lobby_crud import SessionCRUD, SessionMembersCRUD
 from bot.database.lobby_models import Session, SessionMember
 from datetime import datetime, timezone
+
+
 import uuid
 import logging
 from typing import Optional, List
@@ -16,6 +19,7 @@ lobby_router = APIRouter(
 )
 class CloseLobbyRequest(BaseModel):
     user_id: int
+
 class CreateLobbyRequest(BaseModel):
     title: str         
     user_id: int            
@@ -58,6 +62,7 @@ async def create_lobby(request: CreateLobbyRequest):
     
     crud = SessionCRUD()
     session_id = f"lobby_{uuid.uuid4().hex[:8]}"
+
     invite_code = None
     for _ in range(30):
         code = f"LOB{uuid.uuid4().hex[:6].upper()}"      
@@ -66,6 +71,7 @@ async def create_lobby(request: CreateLobbyRequest):
             break  
         if not invite_code:
                 raise HTTPException(status_code=500, detail="Не удалось сгенерировать уникальный код. Попробуйте позже.")
+
     session = Session(
         session_id=session_id,
         creator_id=request.user_id,
@@ -170,6 +176,7 @@ async def get_my_lobbies(user_id: int):
     members_crud = SessionMembersCRUD()
     crud = SessionCRUD()
     
+
     session_ids = members_crud.get_sessions_by_user_id(user_id)
     
     lobbies = []
@@ -203,6 +210,7 @@ async def create_task(session_id: str, request: CreateTaskRequest):
         raise HTTPException(status_code=404, detail="Лобби не найдено")
     if not session.is_active:
         raise HTTPException(status_code=404, detail="Лобби не найдено или закрыто")
+
     
     if session.creator_telegram_id != request.user_id:
         
@@ -297,6 +305,7 @@ async def get_task(session_id: str):
         raise HTTPException(status_code=404, detail="Лобби не найдено")
     if not session.is_active:
         raise HTTPException(status_code=404, detail="Лобби не найдено или закрыто") 
+
     if not session.active_task_text:
         logger.info(f"ℹ️ В лобби {session_id} нет активного задания")
         return {
@@ -332,6 +341,7 @@ async def submit_answer(session_id: str, request: SubmitAnswerRequest):
         raise HTTPException(status_code=404, detail="Лобби не найдено")
     if not session.is_active:
         raise HTTPException(status_code=404, detail="Лобби не найдено или закрыто")
+
     member = members_crud.get_member(session_id, request.user_id)
     if not member:
         logger.warning(f"⚠️ Пользователь {request.user_id} не участник лобби {session_id}")
@@ -344,6 +354,7 @@ async def submit_answer(session_id: str, request: SubmitAnswerRequest):
     if session.active_task_deadline:
         deadline = datetime.fromisoformat(session.active_task_deadline)
         if datetime.now(timezone.utc) > deadline:
+
             logger.warning(f"⚠️ Дедлайн прошёл для задания в лобби {session_id}")
             raise HTTPException(status_code=400, detail="Срок выполнения задания истёк")
     
@@ -390,6 +401,7 @@ async def submit_answer(session_id: str, request: SubmitAnswerRequest):
         "status": "success",
         "message": "Ответ отправлен преподавателю",
         "submitted_at": datetime.now().isoformat()
+
     }
 
 @lobby_router.delete("/{session_id}")
@@ -404,3 +416,5 @@ async def delete_session(session_id: str, request: CloseLobbyRequest = Body(...)
         raise HTTPException(status_code=403, detail="Только владелец может удалять сессии")
     crud.update_session(session_id, {'is_active': False})
     return {"status": "success", "message": "Лобби закрыто", "session_id": session_id}
+
+

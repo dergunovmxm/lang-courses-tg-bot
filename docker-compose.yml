@@ -11,8 +11,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      
+    # TODO: ПРОВЕРИТЬ
+    # Было в ветке main
+    # ports:
+    #   - "5432:5432"
     networks:
       - lang_courses_network
     healthcheck:
@@ -68,7 +71,6 @@ services:
           memory: 4G
         reservations:
           memory: 1G
-
   api:
     build:
       context: .
@@ -91,6 +93,7 @@ services:
       WEBHOOK_API_KEY: ${WEBHOOK_API_KEY}
    
       BOT_WEBHOOK_URL: http://api:8000/webhook
+
     env_file:
       - .env
     depends_on:

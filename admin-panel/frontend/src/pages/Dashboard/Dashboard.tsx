@@ -24,12 +24,17 @@ const Dashboard: React.FC = () => {
       setError(null);
 
       const response = await fetch(
-        "http://localhost:3001/api/dashboard/summary",
+        // TODO: ПРОВЕРИТЬ
+        // Было в ветке main
+        // "http://localhost:3001/api/dashboard/summary",
+
+        // Пришло из ветки task_level
+        `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/api/dashboard/summary`,
         {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {

@@ -16,11 +16,19 @@ const Users = () => {
       setLoading(true);
       setTableLoading(true);
 
-      const response = await fetch("http://localhost:3001/api/users", {
-        headers: {
-          "Content-Type": "application/json",
+      // TODO: ПРОВЕРИТЬ
+      // Было в ветке main
+      // const response = await fetch("http://localhost:3001/api/users", {
+
+      // Пришло из ветки task_level
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/api/users`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
       const result = await response.json();
 
       console.log("result", result);
@@ -30,7 +38,7 @@ const Users = () => {
         message.success(
           `Загружено ${
             result.data.users?.length || result.data?.length || 0
-          } пользователей`
+          } пользователей`,
         );
       } else {
         message.error("Ошибка при загрузке пользователей");

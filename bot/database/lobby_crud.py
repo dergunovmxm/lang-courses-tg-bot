@@ -15,24 +15,35 @@ class SessionCRUD:
         except Exception as e:
             logger.error(f"❌ Ошибка создания сессии: {e}")
             return None
-    def get_session_by_id(self, session_id:str) -> Optional[Session]:
-        try: 
-            result = postgresql_client.select('sessions', f"session_id = '{session_id}'")
-            if result and len(result) > 0:
-                return Session.from_dict(result[0])
-            return None
-        except Exception as e:
-            logger.error(f"❌ Ошибка получения сессии: {e}")
-            return None
-    def get_session_by_invite_code(self, invite_code:str) -> Optional[Session]:
+    def get_session_by_id(self, session_id: str) -> Optional[Session]:
         try:
-
-            result = postgresql_client.select('sessions', f"invite_code = '{invite_code}'")
-            if result and len(result) > 0:
-                return Session.from_dict(result[0])
+            cursor = postgresql_client._get_cursor()
+            query = "SELECT * FROM sessions WHERE session_id = %s LIMIT 1"
+            cursor.execute(query, (session_id,))  
+            result = cursor.fetchone()
+            cursor.close()
+            
+            if result:
+                return Session.from_dict(dict(result))
             return None
+            
         except Exception as e:
-            logger.error(f"❌ Ошибка получения кода приглашения: {e}")
+            logger.error(f"❌ Ошибка получения сессии '{session_id}': {e}")
+            return None
+    def get_session_by_invite_code(self, invite_code: str) -> Optional[Session]:
+        try:
+            cursor = postgresql_client._get_cursor()
+            query = "SELECT * FROM sessions WHERE invite_code = %s LIMIT 1"
+            cursor.execute(query, (invite_code,))  
+            result = cursor.fetchone()
+            cursor.close()
+            
+            if result:
+                return Session.from_dict(dict(result))
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ Ошибка получения сессии по коду '{invite_code}': {e}")
             return None
     def get_all_sessions(self, limit: int=100) -> List[Session]:
         try:

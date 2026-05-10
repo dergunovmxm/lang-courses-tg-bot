@@ -15,24 +15,36 @@ class SessionCRUD:
         except Exception as e:
             logger.error(f"❌ Ошибка создания сессии: {e}")
             return None
-    def get_session_by_id(self, session_id:str) -> Optional[Session]:
-        try: 
-            result = postgresql_client.select('sessions', f"session_id = '{session_id}'")
-            if result and len(result) > 0:
-                return Session.from_dict(result[0])
-            return None
-        except Exception as e:
-            logger.error(f"❌ Ошибка получения сессии: {e}")
-            return None
-    def get_session_by_invite_code(self, invite_code:str) -> Optional[Session]:
-        try:
 
-            result = postgresql_client.select('sessions', f"invite_code = '{invite_code}'")
-            if result and len(result) > 0:
-                return Session.from_dict(result[0])
+    def get_session_by_id(self, session_id: str) -> Optional[Session]:
+        try:
+            cursor = postgresql_client._get_cursor()
+            query = "SELECT * FROM sessions WHERE session_id = %s LIMIT 1"
+            cursor.execute(query, (session_id,))  
+            result = cursor.fetchone()
+            cursor.close()
+            
+            if result:
+                return Session.from_dict(dict(result))
             return None
+            
         except Exception as e:
-            logger.error(f"❌ Ошибка получения кода приглашения: {e}")
+            logger.error(f"❌ Ошибка получения сессии '{session_id}': {e}")
+            return None
+    def get_session_by_invite_code(self, invite_code: str) -> Optional[Session]:
+        try:
+            cursor = postgresql_client._get_cursor()
+            query = "SELECT * FROM sessions WHERE invite_code = %s LIMIT 1"
+            cursor.execute(query, (invite_code,))  
+            result = cursor.fetchone()
+            cursor.close()
+            
+            if result:
+                return Session.from_dict(dict(result))
+            return None
+            
+        except Exception as e:
+            logger.error(f"❌ Ошибка получения сессии по коду '{invite_code}': {e}")
             return None
     def get_all_sessions(self, limit: int=100) -> List[Session]:
         try:
@@ -63,7 +75,7 @@ class SessionCRUD:
             return False
     def get_expired_sessions(self, days: int=90):
         try:
-            # ⚠️ SQL-запрос для поиска старых сессий
+            # SQL запрос для поиска старых сессий
             query = f"""
                 SELECT * FROM sessions 
                 WHERE created_at < NOW() - INTERVAL '{days} days'
@@ -77,13 +89,11 @@ class SessionCRUD:
         except Exception as e:
             logger.error(f"❌ Ошибка получения устаревших сессий: {e}")
             return []
-# ============================================================
-# ИСПРАВЛЕННЫЙ КЛАСС SessionMembersCRUD
-# ============================================================
+
 class SessionMembersCRUD:
     def add_member(self, member: SessionMember) -> Optional[SessionMember]:
         try:
-            # ✅ to_dict() теперь возвращает 'user_id', а не 'telegram_id'
+
             result = postgresql_client.insert('session_members', member.to_dict())
             if result:
                 logger.info(f"✅ Участник добавлен: {member.username}")
@@ -95,7 +105,7 @@ class SessionMembersCRUD:
     
     def get_member(self, session_id: str, user_id: int) -> Optional[SessionMember]:
         try:
-            # ✅ Одинарные кавычки для session_id, без кавычек для user_id (число)
+
             result = postgresql_client.select('session_members', f"session_id = '{session_id}' AND user_id = {user_id}")
             if result and len(result) > 0:
                 return SessionMember.from_dict(result[0])
@@ -106,7 +116,7 @@ class SessionMembersCRUD:
     
     def get_all_members(self, session_id: str) -> List[SessionMember]:
         try:
-            # ✅ self добавлен, кавычки одинарные
+
             result = postgresql_client.select('session_members', f"session_id = '{session_id}'")
             return [SessionMember.from_dict(row) for row in result]
         except Exception as e:
@@ -140,14 +150,23 @@ class SessionMembersCRUD:
         except Exception as e:
             logger.error(f"❌ Ошибка обновления роли: {e}")
             return None
-    def get_sessions_by_user_id(user_id: int) -> List[SessionMember]:
+
+    def get_sessions_by_user_id(self, user_id: int) -> List[str]:
         try:
-            result = postgresql_client.select('session_members', f"user_id = '{user_id}'")
-            if result and len(result) > 0:
-                return Session.from_dict(result[0])
-                
+            cursor = postgresql_client._get_cursor()
+            
+            query = "SELECT session_id FROM session_members WHERE user_id = %s"
+            cursor.execute(query, (user_id,)) 
+            
+            results = cursor.fetchall()
+            cursor.close()
+            
+            return [row['session_id'] for row in results]
+                    
         except Exception as e:
-            logger.error('Ошибка получения списка сессий')
+            logger.error(f'❌ Ошибка получения списка сессий для пользователя {user_id}: {e}')
+            return []
+
 def cleanup_expired_sessions(days: int = 30) -> int:
 
     expired_sessions = SessionCRUD.get_expired_sessions(days)

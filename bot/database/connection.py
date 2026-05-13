@@ -18,40 +18,41 @@ class PostgreSQLClient:
         self._connect()
     
     def _connect(self):
-        """Подключение к PostgreSQL"""
         try:
+            if self.connection and not self.connection.closed:
+                self.connection.close()
+                
             self.connection = psycopg2.connect(
                 host=self.host,
                 port=self.port,
                 user=self.user,
                 password=self.password,
-                dbname=self.dbname
+                dbname=self.dbname,
+                sslmode='require' 
             )
             self.is_connected = True
-            logger.info("✅ Успешное подключение к PostgreSQL")
+            logger.info(f"✅ Подключение к PostgreSQL: {self.host}:{self.port}/{self.dbname}")
         except Exception as e:
-            logger.error(f"❌ Ошибка подключения к PostgreSQL: {e}")
             self.is_connected = False
+            logger.error(f"❌ Ошибка подключения к БД: {e}")
+            raise
     
     def test_connection(self):
-        """Тестирование подключения к PostgreSQL"""
         try:
             if not self.is_connected:
                 return False
             
-            # Простой запрос для проверки соединения
             cursor = self.connection.cursor()
             cursor.execute("SELECT 1")
             cursor.close()
             return True
         except Exception as e:
             logger.error(f"❌ Ошибка тестирования подключения: {e}")
-            # Попробуем переподключиться
+    
             self._connect()
             return self.is_connected
     
     def close(self):
-        """Закрытие соединения"""
         if self.connection and not self.connection.closed:
             self.connection.close()
             self.is_connected = False
@@ -59,13 +60,18 @@ class PostgreSQLClient:
     
 
     def _get_cursor(self):
-        """Получение курсора"""
-        if not self.is_connected or self.connection.closed:
-            self._connect()
-        return self.connection.cursor(cursor_factory=RealDictCursor)
+            try:
+                if not self.is_connected or self.connection.closed:
+                    logger.warning("🔄 Соединение с БД потеряно. Переподключение...")
+                    self._connect()
+                return self.connection.cursor(cursor_factory=RealDictCursor)
+            except psycopg2.OperationalError as e:
+                logger.warning(f"️ Операционная ошибка БД: {e}. Переподключение...")
+                self._connect()
+                return self.connection.cursor(cursor_factory=RealDictCursor)
     
     def insert(self, table: str, data: dict) -> Optional[Dict]:
-        """Вставка данных"""
+
         if not self.is_connected:
             return None
         
@@ -89,20 +95,7 @@ class PostgreSQLClient:
             if self.connection:
                 self.connection.rollback()
             return None
-    # TODO: ПРОВЕРИТЬ
-    # Было в ветке main  
-    # def select(self, table: str, limit: int | None = None) -> List[Dict]:
-    #     try:
-    #         cursor = self._get_cursor()
 
-    #         if limit is None:
-    #             query = f"SELECT * FROM {table}"
-    #             cursor.execute(query)
-    #         else:
-    #             query = f"SELECT * FROM {table} LIMIT %s"
-    #             cursor.execute(query, (limit,))
-
-    # Пришло из ветки task_level
     def select(self, table: str, condition: str | None = None, limit: int | None = None) -> List[Dict]:
         try:
             cursor = self._get_cursor()
@@ -153,7 +146,7 @@ class PostgreSQLClient:
             return None
     
     def delete(self, table: str, filters: Dict[str, Any]) -> bool:
-        """Удаление данных"""
+   
         if not self.is_connected:
             return False
         
@@ -175,7 +168,7 @@ class PostgreSQLClient:
             return False
     
     def count(self, table: str, filters: Dict[str, Any] = None) -> int:
-        """Подсчет записей"""
+    #счет записей
         if not self.is_connected:
             return 0
         
@@ -233,14 +226,11 @@ class PostgreSQLClient:
         try:
             cursor = self._get_cursor()
 
-            # Нормализуем conflict_columns в список
             if isinstance(conflict_columns, str):
                 conflict_columns = [conflict_columns]
             if update_columns is None:
-                # Обновляем все поля, кроме конфликтующих
                 update_columns = [col for col in data.keys() if col not in conflict_columns]
 
-            # Экранируем имена таблиц и колонок
             columns = list(data.keys())
             col_identifiers = sql.SQL(', ').join(map(sql.Identifier, columns))
             val_placeholders = sql.SQL(', ').join(sql.Placeholder() * len(columns))
@@ -280,8 +270,8 @@ class PostgreSQLClient:
                 self.connection.rollback()
             return None
     def add_points(self, user_id: int, points: int) -> int:
-
-        with self.connection.cursor() as cursor:
+        try:
+            cursor = self._get_cursor()
             cursor.execute(
                 """
                 INSERT INTO users (telegram_id, points)
@@ -294,15 +284,14 @@ class PostgreSQLClient:
             )
             new_points = cursor.fetchone()[0]
             self.connection.commit()
+            cursor.close()
             return new_points
-    # TODO: ПРОВЕРИТЬ
-    # Было в ветке main
-    # def get_audio_task(self):
-    #     try:
-    #         cursor = self._get_cursor()
-    #         cursor.execute("SELECT * FROM tasks WHERE type = 'audio_question' ORDER BY RANDOM() LIMIT 1;")
+        except Exception as e:
+            logger.error(f"❌ Ошибка добавления баллов: {e}")
+            if self.connection:
+                self.connection.rollback()
+            raise  
 
-    # Пришло из ветки task_level
     def get_audio_task(self, level: str = None):
         try:
             cursor = self._get_cursor()
@@ -317,11 +306,7 @@ class PostgreSQLClient:
             cursor.close()
             return dict(result) if result else None
         except Exception as e:
-            # TODO: ПРОВЕРИТЬ
-            # Было в ветке main
-            # logger.error(f"❌ Ошибка получения рандомного задания: {e}")
-
-            # Пришло из ветки task_level
+ 
             logger.error(f"❌ Ошибка получения аудиозадания: {e}")
             return None
 
